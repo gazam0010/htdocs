@@ -1,0 +1,153 @@
+.but {
+  display: inline-block;
+  float: right;
+  padding: 8px 16px;
+  background-color: green;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+}
+
+.containerData {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.itemX {
+  flex: 0 0 250px;
+  margin: 10px;
+  padding: 20px;
+  background-color: #f2f2f2;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+select {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 200px;
+  width: 70%;
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+}
+
+option {
+  padding: 8px;
+}
+
+.bodyX {
+  margin: 50px 100px 100px 100px;
+  padding: 20px 50px 50px 50px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+  font-family: Arial, sans-serif;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.custom-table th,
+.custom-table td {
+  padding: 10px;
+  text-align: left; 
+  border-bottom: 1px solid #ddd;
+}
+
+.custom-table th {
+  background-color: #f2f2f2;
+}
+
+.custom-table tbody tr {
+  background-color: #f9f9f9;
+}
+
+#hiddenDiv {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+
+}
+
+.hidden {
+  display: none;
+
+}
+
+
+.radio-select {
+  display: flex;
+  float: right;
+}
+
+.radio-select label {
+  margin-right: 10px;
+}
+
+.radio-button {
+  display: inline-block;
+  padding: 5px 10px;
+  background-color: #FFA500;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.radio-button:hover {
+  background-color: darkgreen;
+}
+
+#secondHalfForm {
+  margin-left: 30%;
+}
+
+#secondHalfForm>label {
+  text-align: center;
+  display: inline-block;
+  font-size: 120%;
+  margin-right: 3%;
+}
+
+.alert {
+  margin-left: 25%;
+  margin-right: 25%;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: lightgreen;
+  text-align: center;
+}
+
+th,
+td {
+  color: #333;
+  font-family: Arial, sans-serif;
+}
+.action-button {
+  display: flex;
+  justify-content: space-around;
+  background-color: #66cc66;
+  color: #fff;
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+
+}
+.action-button button:hover {
+  transform: scale(1.1);
+}

@@ -1,159 +1,96 @@
+<?php
+
+$pid = 23;
+date_default_timezone_set('Asia/Kolkata');
+$date = date('d/m/Y h:i:s a', time());
+
+$db1 = mysqli_connect("localhost", "root", "", "test");
+
+if (isset($_POST['apt_book'])) {
+  //fetching last apppointment id
+  $lastidSql = mysqli_query($db1, "SELECT max(aid) AS max_aid FROM `appointments`");
+  $fetchId = mysqli_fetch_assoc($lastidSql);
+  $aid = $fetchId['max_aid'] + 1;
+
+
+  $did = $_POST['radio-option'];
+  $apt_dt = $_POST['date'] . ' ' . $_POST['time'];
+  $status = 'OPEN';
+  $description = $_POST['description'];
+
+  //sql query to insert into the table
+  $result = mysqli_query($db1, "INSERT INTO appointments (aid, pid, did, apt_date_time, status, description, book_date)
+  VALUES ('$aid', '$pid', '$did', '$apt_dt', '$status', '$description', '$date')");
+  if ($result) {
+    header("location: aa.php?success-booked=1&aid=" . $aid . "");
+  } else {
+    echo "Some error occured";
+  }
+  mysqli_close($db1);
+}
+
+
+?>
 <!DOCTYPE html>
 <html>
 
 <head>
-  <title>Form with Two Parts</title>
-  <style>
-    .but {
-      display: inline-block;
-      float: right;
-      padding: 8px 16px;
-      background-color: green;
-      color: white;
-      text-align: center;
-      text-decoration: none;
-      border-radius: 4px;
-      cursor: pointer;
-      border: none;
-    }
-
-    .containerData {
-      display: flex;
-      flex-wrap: wrap;
-    }
-
-    .itemX {
-      flex: 0 0 200px;
-      margin: 10px;
-      padding: 20px;
-      background-color: #f2f2f2;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    label {
-      display: block;
-      margin-bottom: 10px;
-    }
-
-    select {
-      padding: 8px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      width: 200px;
-      width: 70%;
-      display: block;
-      margin: 0 auto;
-      text-align: center;
-    }
-
-    option {
-      padding: 8px;
-    }
-
-    .bodyX {
-      margin: 50px 100px 100px 100px;
-      padding: 20px 50px 50px 50px;
-      background-color: lightblue;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    //Table Design
-    .custom-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .custom-table th,
-    .custom-table td {
-      padding: 10px;
-      text-align: left;
-      border: 1px solid #ddd;
-    }
-
-    .custom-table th {
-      background-color: #f2f2f2;
-    }
-
-    .custom-table tbody tr {
-      background-color: #f9f9f9;
-    }
-
-    #hiddenDiv {
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-
-    .radio-select {
-      display: flex;
-      float: right;
-    }
-
-    .radio-select label {
-      margin-right: 10px;
-    }
-
-    .radio-button {
-      display: inline-block;
-      padding: 5px 10px;
-      background-color: #FFA500;
-      color: white;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-
-    .radio-button:hover {
-      background-color: darkgreen;
-    }
-
-    #secondHalfForm {
-      margin-left: 30%;
-    }
-
-    #secondHalfForm>label {
-      text-align: center;
-      display: inline-block;
-      font-size: 120%;
-      margin-right: 3%;
-    }
-  </style>
+  <link rel="stylesheet" href="appt.css?">
 </head>
 
-<body>
+<body style="background-color: #f7f7f7;">
+  <?php
+  if (isset($_GET['success-booked'])) {
+    echo '<div class="alert">
+Appointment successfully booked with Appointment ID: ' . $_GET['aid'] . '
+</div>';
+  }
+  if (isset($_GET['return-msg'])) {
+    echo '<div class="alert">' . $_GET['return-msg'] . '
+</div>';
+  }
+  ?>
+
   <div id="formContainer">
     <div id="firstHalf">
-      <div class="bodyX"">
-             
-                    <h4 align=" left" id="toggleButton">
-        Show/hide previous appointments ⬇
+      <div class="bodyX">
+
+        <h4 align=" left" id="toggleButton">
+          Show/hide previous appointments ⬇
         </h4>
         <div id="hiddenDiv" class="hidden">
           <table class="custom-table">
             <tr>
-              <th>AID</th>
+              <th>Appointment ID</th>
+              <th>Booking Date</th>
               <th>Specialization</th>
               <th>Doctor</th>
-              <th>Date & Time</th>
+              <th>App. Date & Time</th>
               <th>Status</th>
+              <th>Action</th>
             </tr>
             <tbody>
+              <?php
+              //Fetching Previous Appointments
+              
+              $resultApt = mysqli_query($db1, "SELECT * FROM appointments app JOIN doctorprofile dr ON app.did = dr.did WHERE app.pid = $pid");
+
+              while ($row = mysqli_fetch_assoc($resultApt)) {
+                echo ' 
               <tr>
-                <td>Data 1</td>
-                <td>Data 2</td>
-                <td>Data 3</td>
-              </tr>
-              <tr>
-                <td>Data 4</td>
-                <td>Data 5</td>
-                <td>Data 6</td>
-              </tr>
+                <td>' . $row['aid'] . '</td>
+                <td>' . $row['book_date'] . '</td>
+                <td>' . $row['dspecialization'] . '</td>
+                <td>' . $row['dname'] . '</td>
+                <td>' . $row['apt_date_time'] . '</td>
+                <td>' . $row['status'] . '</td>';
+                  echo ' <td><form method="POST" action="ss.php" target="_blank"><input type="hidden" name="aid" value="' . $row['aid'] . '">
+                  <input type="submit" class="action-button" value="Open" name="access_apt"></form></td>';
+              
+                echo '</tr>';
+              }
+              mysqli_close($db1);
+              ?>
             </tbody>
           </table>
           <?php
@@ -172,8 +109,16 @@
         </label>
         <select id="firstSelect" name="specialization" onchange="fetchData()">
           <option value="">Select an option</option>
-          <option value="diab">Diab</option>
-          <option value="cardio">Cardio</option>
+          <option value="Cardiologist">Cardiologist</option>
+          <option value="Pathologist">Pathologist</option>
+          <option value="Pediatrician">Pediatrician</option>
+          <option value="Neurologist">Neurologist</option>
+          <option value="Psychiatrist">Psychiatrist</option>
+          <option value="Dermatologist">Dermatologist</option>
+          <option value="Surgeon">Surgeon</option>
+          <option value="Gestreonterologist">Gestreonterologist</option>
+          <option value="Orthopedic">Orthopedic</option>
+          <option value="Opthalmology">Opthalmology</option>
         </select>
         <div id="selectedSpec"></div>
 
@@ -215,8 +160,8 @@
         <br>
         <br>
         <label for="description">Description: </label><br>
-         <textarea id="description" name="desc" type="textarea" rows="4" cols="40"></textarea><br><br><br>
-        <input class="but" type="submit" value="Book Appointment">
+        <textarea id="description" name="description" type="textarea" rows="4" cols="40"></textarea><br><br><br>
+        <input class="but" type="submit" name="apt_book" value="Book Appointment">
       </form>
 
       </form>
@@ -297,6 +242,7 @@
       }
     });
 
+   
 
   </script>
 </body>
