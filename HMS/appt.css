@@ -56,6 +56,11 @@ option {
   font-family: Arial, sans-serif;
 }
 
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
 .custom-table {
   width: 100%;
   border-collapse: collapse;
@@ -65,7 +70,7 @@ option {
 .custom-table th,
 .custom-table td {
   padding: 10px;
-  text-align: left; 
+  text-align: left;
   border-bottom: 1px solid #ddd;
 }
 
@@ -76,6 +81,8 @@ option {
 .custom-table tbody tr {
   background-color: #f9f9f9;
 }
+
+
 
 #hiddenDiv {
   opacity: 0;
@@ -136,6 +143,7 @@ td {
   color: #333;
   font-family: Arial, sans-serif;
 }
+
 .action-button {
   display: flex;
   justify-content: space-around;
@@ -148,6 +156,7 @@ td {
   font-size: 14px;
 
 }
+
 .action-button button:hover {
   transform: scale(1.1);
 }
