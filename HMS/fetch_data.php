@@ -3,7 +3,7 @@ $selectedOption = $_GET['option'];
 
 $connection = mysqli_connect('localhost', 'root', '', 'test');
 
-$query = "SELECT * FROM doctorprofile WHERE dspecialization = '$selectedOption'";
+$query = "SELECT * FROM doctorprofile WHERE dspecialization = ?";
 $stmt = mysqli_prepare($connection, $query);
 mysqli_stmt_bind_param($stmt, "s", $selectedOption);
 mysqli_stmt_execute($stmt);

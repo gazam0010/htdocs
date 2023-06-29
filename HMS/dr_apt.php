@@ -89,34 +89,33 @@
     <table class="custom-table">
         <tr>
             <th>Appointment ID</th>
-            <th>Doctor Name</th>
-            <th>Doctor ID</th>
-            <th>Specialization</th>
+            <th>Booking Date</th>
+            <th>Patient Name</th>
             <th>Current Status</th>
-            <th>Booking Date Time</th>
             <th>Appointment Date Time</th>
+            <th>Description</th>
             <th>Actions</th>
         </tr>
         <?php
-        $did = 2;
+        $did = 11;
         $db1 = mysqli_connect("localhost", "root", "", "test");
-        $resultApt = mysqli_query($db1, "SELECT * FROM appointments app JOIN patient p ON app.pid = p.pid WHERE app.did = $did");
+        $resultApt = mysqli_query($db1, "SELECT * FROM appointments app JOIN patient p ON app.pid = p.pid WHERE app.did = $did ORDER BY aid");
         while ($row = mysqli_fetch_assoc($resultApt)) {
       
             echo "<tr>";
             echo "<td>{$row['aid']}</td>";
-            echo "<td>{$row['doctor_name']}</td>";
-            echo "<td>{$row['doctor_id']}</td>";
-            echo "<td>{$row['specialization']}</td>";
+            echo "<td>{$row['book_date']}</td>";
+            echo "<td>{$row['pname']}</td>";
             echo "<td>{$row['status']}</td>";
-            echo "<td>{$row['booking_date_time']}</td>";
-            echo "<td>{$row['appointment_date_time']}</td>";
+            echo "<td>{$row['apt_date_time']}</td>";
+            echo "<td>{$row['description']}</td>";
             echo "<td class=\"action-buttons\">";
-            echo "<button class=\"close\" onclick=\"closeAppointment({$row['id']})\">Close</button>";
-            echo "<button class=\"start\" onclick=\"startAppointment({$row['id']})\">Start</button>";
+            echo "<a href='apt_engage.php?aid=".$row['aid']."' target='_blank'>
+            <button class=\"start\" >Start</button></a>";
             echo "</td>";
             echo "</tr>";
         }
+        mysqli_close($db1);
         ?>
     </table>
 
