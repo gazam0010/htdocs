@@ -158,9 +158,6 @@ mysqli_close($connection);
 
         // Function to fetch chat messages from the server
         function fetchChatMessages() {
-            var sender = document.getElementById('sender').value;
-            var recipient = document.getElementById('recipient').value;
-
             // Fetch the chat messages from the server using AJAX or fetch
             var xhr = new XMLHttpRequest();
             xhr.open('GET', 'fetch_chat_messages.php?sender=' + encodeURIComponent(sender) + '&recipient=' + encodeURIComponent(recipient));
