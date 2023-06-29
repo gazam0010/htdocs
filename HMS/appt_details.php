@@ -25,6 +25,7 @@
             from {
                 opacity: 0;
             }
+
             to {
                 opacity: 1;
             }
@@ -40,6 +41,7 @@
             from {
                 transform: translateY(20px);
             }
+
             to {
                 transform: translateY(0);
             }
@@ -124,6 +126,7 @@
             justify-content: center;
             animation: fade-in 0.5s ease;
         }
+
         .box {
             padding: 20px;
             background-color: #f9f9f9;
@@ -131,6 +134,7 @@
             margin-bottom: 20px;
             transition: transform 0.5s ease-in-out;
         }
+
         .vital-info {
             font-weight: bold;
             margin-bottom: 10px;
@@ -162,6 +166,23 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
+
+        .comment {
+            max-width: 600px;
+            width: 50%;
+            background-color: lightcyan;
+            padding: 3px;
+            border-radius: 3px;
+            margin: 0 auto;
+            margin-top: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 5px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 
@@ -184,7 +205,10 @@
         mysqli_close($db1);
     }
 
+    //data posted from aa.php
     $aid = $_POST['aid'];
+    $did = $_POST['did'];
+    $pname = $_POST['pname'];
     $resultApt = mysqli_query($db1, "SELECT * FROM appointments app JOIN doctorprofile dr ON app.did = dr.did JOIN vitals v ON app.aid = v.aid WHERE app.aid = $aid");
 
     $row = mysqli_fetch_assoc($resultApt);
@@ -211,7 +235,7 @@
         <br>
 
         <div class="buttons">
-            <?php if ($status == 'ONGOING'): ?>
+            <?php if ($status == 'In Progress' || $status == 'ONGOING' || $status == 'COMPLETED'): ?>
                 <div id="contentContainer" style="text-align: center;">
                     <!-- FETCHED LINK HERE -->
                 </div>
@@ -222,13 +246,14 @@
                     <button type="submit" name="delete_apt">Cancel Appointment</button>
                 </form>
             <?php endif; ?>
-            <?php if ($status == 'COMPLETED'): ?>
-                <div class="comment">
-                    <strong>Comment by the Doctor:</strong>
-                    <?php echo $row['comm']; ?>
-                </div>
-            <?php endif; ?>
+
         </div>
+        <?php if ($status == 'COMPLETED'): ?>
+            <div class="comment">
+                <strong>Comment by the Doctor:</strong>
+                <?php echo $row['comm']; ?>
+            </div>
+        <?php endif; ?>
         <br>
 
         <hr>
@@ -263,7 +288,8 @@
                 <?php echo $row['description']; ?>
             </p>
         </div>
-        <br><hr><br>
+        <br>
+        <hr><br>
         <div class="box">
             <div class="vital-info">Vital Information</div>
             <div class="vital-info-box">
@@ -332,7 +358,13 @@
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
                     if (xhr.responseText !== '') {
-                        document.getElementById('contentContainer').innerHTML = `<strong>Here's the link:</strong><br><br><a href="${xhr.responseText}" target="_blank"><button>Start Appointment</button></a>`;
+                        document.getElementById('contentContainer').innerHTML = `<strong>Here's the link:</strong><br><br>
+                        <form method="POST" action="chat_pat.php">
+                        <input type="hidden" name="aid" value="<?php echo $aid; ?>">
+                            <input type="hidden" name="recipient" value="<?php echo $row['dname'] ?>">
+                            <input type="hidden" name="sender" value="<?php echo $pname ?>">
+                        <input type="hidden" name="chatId" value="${xhr.responseText}">
+                        <button type="submit" name="start_chat">Open Chat</button></a></form>`;
                         clearInterval(intervalID);
                     } else {
                         document.getElementById('contentContainer').innerHTML = loadingAnimation;

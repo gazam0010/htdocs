@@ -1,5 +1,50 @@
+<?php
+session_start();
+
+$host = 'localhost';
+$database = 'test';
+$username = 'root';
+$password = '';
+
+$connection = mysqli_connect($host, $username, $password, $database);
+
+//destroying chat session
+if (isset($_POST['unset_session'])) {
+    unset($_SESSION['chatId']);
+    $chatId = $_POST['chatId'];
+
+    //De-activating current chat status
+    $query = "UPDATE chat_status SET status = 'ENDED' WHERE chat_id = '$chatId'";
+    mysqli_query($connection, $query);
+
+    mysqli_close($connection);
+
+    session_unset();
+
+    session_destroy();
+
+    header('Location: chat_entry.php?msg=Destroyed');
+    exit();
+}
+
+
+$_SESSION['chatId'] = uniqid(); // Generate a unique ID
+$chatId = $_SESSION['chatId'];
+
+//Activating current chat status
+$query = "INSERT INTO chat_status (chat_id, status)
+    VALUES ('$chatId', 'ACTIVE')";
+mysqli_query($connection, $query);
+
+mysqli_close($connection);
+
+
+
+
+?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Chat Entry</title>
     <style>
@@ -50,18 +95,21 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Chat Entry</h1>
         <form action="chat.php" method="POST">
             <label for="sender">Your Username:</label>
             <input type="text" id="sender" name="sender" placeholder="Your username" required>
-            
+
             <label for="recipient">Recipient Username:</label>
             <input type="text" id="recipient" name="recipient" placeholder="Recipient username" required>
-            
+            <input type="hidden" value="<?php echo $chatId; ?>" name="chatId">
+
             <button type="submit" name="start_chat">Start Chat</button>
         </form>
     </div>
 </body>
+
 </html>

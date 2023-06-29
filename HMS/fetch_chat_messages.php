@@ -19,7 +19,7 @@ function decryptMessage($encryptedData, $key)
     return $decryptedMessage;
 }
 
-function getChatMessages($sender, $recipient) {
+function getChatMessages($chatId, $sender, $recipient) {
     global $connection;
     
     $sender = mysqli_real_escape_string($connection, $sender);
@@ -27,8 +27,8 @@ function getChatMessages($sender, $recipient) {
     
     $query = "SELECT sender, recipient, message, timestamp
               FROM chat_messages
-              WHERE (sender = '$sender' AND recipient = '$recipient')
-              OR (sender = '$recipient' AND recipient = '$sender')
+              WHERE (sender = '$sender' AND recipient = '$recipient' AND chat_id = '$chatId')
+              OR (sender = '$recipient' AND recipient = '$sender' AND chat_id = '$chatId')
               ORDER BY timestamp ASC";
     
     $result = mysqli_query($connection, $query);
@@ -43,11 +43,12 @@ function getChatMessages($sender, $recipient) {
     return $messages;
 }
 
-if (isset($_GET['sender'], $_GET['recipient'])) {
+if (isset($_GET['chatId'], $_GET['sender'], $_GET['recipient'])) {
     $sender = $_GET['sender'];
     $recipient = $_GET['recipient'];
+    $chatId = $_GET['chatId'];
 
-    $chatMessages = getChatMessages($sender, $recipient);
+    $chatMessages = getChatMessages($chatId, $sender, $recipient);
 
     header('Content-Type: application/json');
     echo json_encode(['messages' => $chatMessages]);

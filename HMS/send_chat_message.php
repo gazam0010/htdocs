@@ -19,7 +19,7 @@ function encryptMessage($message, $key)
     return $encryptedData;
 }
 
-function insertChatMessage($sender, $recipient, $message, $encryptionKey)
+function insertChatMessage($chatId, $sender, $recipient, $message, $encryptionKey)
 {
     global $connection;
 
@@ -28,8 +28,8 @@ function insertChatMessage($sender, $recipient, $message, $encryptionKey)
 
     $encryptedMessage = encryptMessage($message, $encryptionKey);
 
-    $query = "INSERT INTO chat_messages (sender, recipient, message, timestamp)
-              VALUES ('$sender', '$recipient', '$encryptedMessage', NOW())";
+    $query = "INSERT INTO chat_messages (chat_id, sender, recipient, message, timestamp)
+              VALUES ('$chatId','$sender', '$recipient', '$encryptedMessage', NOW())";
 
     mysqli_query($connection, $query);
 
@@ -44,12 +44,13 @@ if (isset($_POST['sender'], $_POST['recipient'], $_POST['message'])) {
     $sender = $_POST['sender'];
     $recipient = $_POST['recipient'];
     $message = $_POST['message'];
-
+    $chatId = $_POST['chatId'];
     // Encryption key for message encryption and decryption
     $encryptionKey = "FreakAzam9xbdxf5Gx1e8lxf8xc7A23b8C19d6E47F5"; 
 
-    insertChatMessage($sender, $recipient, $message, $encryptionKey);
+    insertChatMessage($chatId, $sender, $recipient, $message, $encryptionKey); // Pass the chatId as a parameter
 }
+
 
 mysqli_close($connection);
 ?>

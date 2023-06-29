@@ -97,7 +97,7 @@
             <th>Actions</th>
         </tr>
         <?php
-        $did = 11;
+        $did = 2;
         $db1 = mysqli_connect("localhost", "root", "", "test");
         $resultApt = mysqli_query($db1, "SELECT * FROM appointments app JOIN patient p ON app.pid = p.pid WHERE app.did = $did ORDER BY aid");
         while ($row = mysqli_fetch_assoc($resultApt)) {
@@ -110,7 +110,7 @@
             echo "<td>{$row['apt_date_time']}</td>";
             echo "<td>{$row['description']}</td>";
             echo "<td class=\"action-buttons\">";
-            echo "<a href='apt_engage.php?aid=".$row['aid']."' target='_blank'>
+            echo "<a href='apt_engage.php?mode=1&did=".$row['did']."&aid=".$row['aid']."' target='_blank'>
             <button class=\"start\" >Start</button></a>";
             echo "</td>";
             echo "</tr>";

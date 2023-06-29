@@ -1,12 +1,11 @@
 <?php
-
-
 $host = 'localhost';
 $database = 'test';
 $username = 'root';
 $password = '';
 
 $connection = mysqli_connect($host, $username, $password, $database);
+
 if (!$connection) {
     die("Failed to connect to the database: " . mysqli_connect_error());
 }
@@ -17,18 +16,17 @@ if (isset($_POST['start_chat'])) {
     $aid = $_POST['aid'];
     $recipient = $_POST['recipient'];
     $chatId = $_POST['chatId'];
+    //check if chat active?
+    $chatResult = mysqli_query($connection, "SELECT * FROM chat_status WHERE chat_id = '$chatId'");
+    $rowChat = mysqli_fetch_assoc($chatResult);
 
-    //Updating chat status and inserting chat id in appointment table so that patient gets the link
-    $query = "INSERT INTO chat_status (chat_id, status)
-    VALUES ('$chatId', 'ACTIVE');
-    UPDATE appointments SET vc_link = '$chatId', status = 'ONGOING' WHERE aid = '$aid'";
-    
-    mysqli_multi_query($connection, $query);
-
+    $chatStatusRow = $rowChat['status'];
 } else {
-    header('Location:dr_apt.php');
+    header('Location:aa.php');
     exit();
 }
+
+
 
 // Function to insert a new chat message into the database
 function insertChatMessage($chatId, $sender, $recipient, $message)
@@ -60,32 +58,6 @@ function decryptMessage($encryptedData, $key)
     $encryptedMessage = substr($data, $ivLength);
     $decryptedMessage = openssl_decrypt($encryptedMessage, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
     return $decryptedMessage;
-}
-// Function to retrieve chat messages from the database
-function getChatMessages($sender, $recipient, $chatId)
-{
-    global $connection;
-
-    $sender = mysqli_real_escape_string($connection, $sender);
-    $recipient = mysqli_real_escape_string($connection, $recipient);
-
-    $query = "SELECT sender, recipient, message, timestamp
-              FROM chat_messages
-              WHERE (sender = '$sender' AND recipient = '$recipient' AND chat_id = '$chatId')
-              OR (sender = '$recipient' AND recipient = '$sender' AND chat_id = '$chatId')
-              ORDER BY timestamp ASC";
-
-    $result = mysqli_query($connection, $query);
-
-    // Fetch and decrypt the chat messages
-    $messages = [];
-    while ($row = mysqli_fetch_assoc($result)) {
-        $message = $row;
-        $message['message'] = decryptMessage($row['message'], 'FreakAzam9xbdxf5Gx1e8lxf8xc7A23b8C19d6E47F5');
-        $messages[] = $message;
-    }
-
-    return $messages;
 }
 
 // Check if the chat form was submitted
@@ -218,11 +190,11 @@ mysqli_close($connection);
 
 <body>
     <div class="container">
-        <form action="apt_engage.php" method="post">
-            <input type="hidden" value="<?php echo $chatId; ?>" name="chatId">
-            <input type="hidden" value="<?php echo $aid; ?>" name="aid">
-            <button type="submit" name="unset_session">End Session</button>
-        </form>
+        <?php if ($chatStatusRow == 'ACTIVE'): ?>
+                    <a href="aa.php"><button class="action-button">Exit Chat</button></a>
+              
+        <?php endif ?>
+
         <h1>Appointment Chat</h1>
         <span style="float:left; color:grey; font-size: 10px;">Appointment ID:
             <?php echo $aid; ?>
@@ -232,9 +204,15 @@ mysqli_close($connection);
         </span><br><br>
 
         <div id="chat-container"></div>
-        <input type="text" id="message" placeholder="Message" style="width: calc(100% - 80px);">
-        <button onclick="sendChatMessage()">Send</button>
-
+        <?php if ($chatStatusRow == 'ACTIVE'): ?>
+            <input type="text" id="message" placeholder="Message" style="width: calc(100% - 80px);">
+            <button onclick="sendChatMessage()">Send</button>
+        <?php endif ?>
+        <?php
+        if ($chatStatusRow != 'ACTIVE') {
+            echo '<h5 style="text-align: center;">Chat has been ended!</h5>';
+        }
+        ?>
         <span style="float:right; color:grey; font-size: 10px;">AES 128-bit Encryption</span>
 
     </div>
@@ -306,14 +284,6 @@ mysqli_close($connection);
             document.getElementById('message').value = '';
         }
 
-        // Function to handle the Enter key press event in the message input field
-        document.getElementById('message').addEventListener('keydown', function (event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                sendChatMessage();
-            }
-        });
-
         // Function to periodically fetch chat messages from the server
         function fetchChatMessages() {
             var sender = '<?php echo $sender; ?>';
@@ -338,7 +308,7 @@ mysqli_close($connection);
             xhr.send();
         }
 
-        // Periodically fetch chat messages every 5 seconds
+        // Periodically fetch chat messages every 1 seconds
         setInterval(fetchChatMessages, 1000);
     </script>
 </body>

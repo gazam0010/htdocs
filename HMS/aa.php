@@ -95,7 +95,7 @@ Appointment successfully booked with Appointment ID: ' . $_GET['aid'] . '
                             <tbody>
                                 <?php
                                 // Fetching Previous Appointments
-                                $resultApt = mysqli_query($db1, "SELECT * FROM appointments app JOIN doctorprofile dr ON app.did = dr.did WHERE app.pid = $pid");
+                                $resultApt = mysqli_query($db1, "SELECT * FROM appointments app JOIN patient p ON app.pid = p.pid JOIN doctorprofile dr ON app.did = dr.did WHERE app.pid = $pid");
 
                                 while ($row = mysqli_fetch_assoc($resultApt)) {
                                     echo '
@@ -109,6 +109,8 @@ Appointment successfully booked with Appointment ID: ' . $_GET['aid'] . '
                                 <td>
                                     <form method="POST" action="appt_details.php" target="_blank">
                                         <input type="hidden" name="aid" value="' . $row['aid'] . '">
+                                        <input type="hidden" name="did" value="' . $row['did'] . '">
+                                        <input type="hidden" name="pname" value="' . $row['pname'] . '">
                                         <input type="submit" class="action-button" value="Open" name="access_apt">
                                     </form>
                                 </td>
