@@ -22,7 +22,6 @@ if (isset($_POST['unset_session'])) {
     exit();
 }
 
-$chatId = uniqid();
 
 
 if (isset($_GET['aid'])) {
@@ -32,13 +31,16 @@ if (isset($_GET['aid'])) {
     header("location: dr_apt.php");
     exit();
 }
-
-
-
 //fetching appointment details from apt , patients and vitals table.
 
 $resultAptEng = mysqli_query($db1, "SELECT * FROM appointments app JOIN doctorprofile d ON d.did = app.did JOIN patient p ON app.pid = p.pid JOIN vitals v ON app.aid = v.aid WHERE app.aid = $aid");
 $row = mysqli_fetch_assoc($resultAptEng);
+
+if($row['vc_link'] != ''){
+    $chatId = $row['vc_link'];
+} else {
+    $chatId = uniqid();
+}
 
 //updating other_actions status
 if (isset($_POST['other_action'])) {
@@ -158,26 +160,26 @@ if (isset($_POST['complete_apt'])) {
         </div>
 
         <div class="action-box">
-            <?php if ($row['status'] != 'COMPLETED' && $row['status'] != 'CLOSED'): ?>
+            <?php $status = $row['status']; ?>
+            <?php if ($status != 'CLOSED'): ?>
                 <div class="action-buttons">
-                    <?php if ($row['status'] == 'In Progress'): ?>
+                    <?php if ($status == 'In Progress' || $status == 'ONGOING' || $status == 'COMPLETED'): ?>
                         <form method="POST" action="chat.php">
                             <input type="hidden" name="aid" value="<?php echo $aid; ?>">
                             <input type="hidden" name="chatId" value="<?php echo $chatId; ?>">
                             <input type="hidden" name="sender" value="<?php echo $row['dname'] ?>">
                             <input type="hidden" name="recipient" value="<?php echo $row['pname'] ?>">
                             <button name="start_chat" type="submit" class="action-button primary-action"
-                                onclick="if(confirmAction('Start'))" target="_blank">Start
-                                Appointment</button>
+                                onclick="if(confirmAction('Start'))" target="_blank">Open Chat</button>
                         </form>
-                    <?php endif ?>
-                    <?php if ($row['status'] != 'CLOSE'): ?>
+                    <?php endif; ?>
+                    <?php if ($status != 'CLOSE' && $status != 'COMPLETED'): ?>
                         <form method="POST" action="">
                             <button class="action-button" onclick="if(confirmAction('Close'))" type="submit" name="other_action"
                                 value="CLOSED">Close</button>
                         </form>
-                    <?php endif ?>
-                    <?php if ($row['status'] != 'In Progress'): ?>
+                    <?php endif; ?>
+                    <?php if ($status != 'In Progress'): ?>
                         <form method="POST" action="">
                             <button class="action-button" onclick="if(confirmAction('change status to In Progress '))" type="submit" name="other_action"
                                 value="In Progress">Initiate Appointment</button>
