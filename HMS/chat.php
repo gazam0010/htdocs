@@ -1,11 +1,12 @@
 <?php
-// Retrieve the sender and recipient usernames from the query parameters
 if (isset($_POST['start_chat'])) {
     $sender = $_POST['sender'];
     $recipient = $_POST['recipient'];
+} else {
+    header('Location:chat_entry.php');
+    exit();
 }
 
-// Establish database connection
 $host = 'localhost';
 $database = 'test';
 $username = 'root';
@@ -13,7 +14,6 @@ $password = '';
 
 $connection = mysqli_connect($host, $username, $password, $database);
 
-// Check if the database connection was successful
 if (!$connection) {
     die("Failed to connect to the database: " . mysqli_connect_error());
 }
@@ -23,49 +23,52 @@ function insertChatMessage($sender, $recipient, $message)
 {
     global $connection;
 
-    // Escape the values to prevent SQL injection
     $sender = mysqli_real_escape_string($connection, $sender);
     $recipient = mysqli_real_escape_string($connection, $recipient);
     $message = mysqli_real_escape_string($connection, $message);
 
-    // Create the SQL query
     $query = "INSERT INTO chat_messages (sender, recipient, message, timestamp)
               VALUES ('$sender', '$recipient', '$message', NOW())";
 
-    // Execute the query
     mysqli_query($connection, $query);
 
-    // Check if the query was successful
     if (mysqli_affected_rows($connection) > 0) {
-        return true; // Message inserted successfully
+        return true; 
     } else {
-        return false; // Failed to insert message
+        return false; 
     }
 }
-
+function decryptMessage($encryptedData, $key)
+{
+    $data = base64_decode($encryptedData);
+    $ivLength = openssl_cipher_iv_length('AES-256-CBC');
+    $iv = substr($data, 0, $ivLength);
+    $encryptedMessage = substr($data, $ivLength);
+    $decryptedMessage = openssl_decrypt($encryptedMessage, 'AES-256-CBC', $key, OPENSSL_RAW_DATA, $iv);
+    return $decryptedMessage;
+}
 // Function to retrieve chat messages from the database
 function getChatMessages($sender, $recipient)
 {
     global $connection;
 
-    // Escape the values to prevent SQL injection
     $sender = mysqli_real_escape_string($connection, $sender);
     $recipient = mysqli_real_escape_string($connection, $recipient);
 
-    // Create the SQL query
     $query = "SELECT sender, recipient, message, timestamp
               FROM chat_messages
               WHERE (sender = '$sender' AND recipient = '$recipient')
               OR (sender = '$recipient' AND recipient = '$sender')
               ORDER BY timestamp ASC";
 
-    // Execute the query
     $result = mysqli_query($connection, $query);
 
-    // Fetch and return the chat messages
+    // Fetch and decrypt the chat messages
     $messages = [];
     while ($row = mysqli_fetch_assoc($result)) {
-        $messages[] = $row;
+        $message = $row;
+        $message['message'] = decryptMessage($row['message'], 'FreakAzam9xbdxf5Gx1e8lxf8xc7A23b8C19d6E47F5'); 
+        $messages[] = $message;
     }
 
     return $messages;
@@ -77,7 +80,6 @@ if (isset($_POST['sender'], $_POST['recipient'], $_POST['message'])) {
     $recipient = $_POST['recipient'];
     $message = $_POST['message'];
 
-    // Insert the chat message into the database
     if (insertChatMessage($sender, $recipient, $message)) {
         echo "Message sent successfully!";
     } else {
@@ -85,7 +87,6 @@ if (isset($_POST['sender'], $_POST['recipient'], $_POST['message'])) {
     }
 }
 
-// Close the database connection
 mysqli_close($connection);
 ?>
 <!DOCTYPE html>
@@ -191,15 +192,22 @@ mysqli_close($connection);
                 transform: translateX(0);
             }
         }
+        .chat-users-note {
+            margin-left: 33%;
+            color:#6c757d;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <h1>Chat Interface</h1>
+        <span class="chat-users-note"><?php echo $sender.' is chatting with '.$recipient; ?></span><br><br>
         <div id="chat-container"></div>
         <input type="text" id="message" placeholder="Message" style="width: calc(100% - 80px);">
         <button onclick="sendChatMessage()">Send</button>
+        
+    <span style="float:right; color:grey; font-size: 10px;">AES 128-bit Encryption</span>
 
     </div>
 
@@ -233,13 +241,10 @@ mysqli_close($connection);
                 chatContainer.appendChild(messageElement);
             }
 
-            // Scroll to the bottom of the chat container
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
 
-        // Function to send a new chat message
-        // Function to send a new chat message
         function sendChatMessage() {
             var sender = '<?php echo $sender; ?>';
             var recipient = '<?php echo $recipient; ?>';
@@ -247,9 +252,8 @@ mysqli_close($connection);
 
             // Check if the message is not empty
             if (message !== '') {
-                // Send the chat message to the server using AJAX or fetch
                 var xhr = new XMLHttpRequest();
-                xhr.open('POST', 'send_chat_message.php'); // Replace 'send_chat_message.php' with the actual server-side script
+                xhr.open('POST', 'send_chat_message.php'); 
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -275,7 +279,7 @@ mysqli_close($connection);
         // Function to handle the Enter key press event in the message input field
         document.getElementById('message').addEventListener('keydown', function (event) {
             if (event.key === 'Enter') {
-                event.preventDefault(); // Prevent the default Enter key behavior (e.g., line break)
+                event.preventDefault(); 
                 sendChatMessage();
             }
         });
