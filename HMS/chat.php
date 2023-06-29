@@ -1,4 +1,10 @@
 <?php
+// Retrieve the sender and recipient usernames from the query parameters
+if (isset($_POST['start_chat'])) {
+    $sender = $_POST['sender'];
+    $recipient = $_POST['recipient'];
+}
+
 // Establish database connection
 $host = 'localhost';
 $database = 'test';
@@ -84,27 +90,118 @@ mysqli_close($connection);
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Chat Interface</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f1f1f1;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
         #chat-container {
             height: 300px;
             overflow: auto;
             border: 1px solid #ccc;
             padding: 10px;
+            margin-bottom: 20px;
         }
 
         .message {
             margin-bottom: 10px;
+            padding: 5px;
+            border-radius: 4px;
+            position: relative;
+            animation-duration: 0.5s;
+            animation-fill-mode: both;
+        }
+
+        .message.sent {
+            background-color: #f1f1f1;
+            text-align: right;
+        }
+
+        .message.received {
+            background-color: #e5e5e5;
+            text-align: left;
+        }
+
+
+        .message .meta {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .message .content {
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        button {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        @keyframes slideInRight {
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
         }
     </style>
 </head>
+
 <body>
-    <div id="chat-container"></div>
-    <input type="text" id="sender" placeholder="Your username">
-    <input type="text" id="recipient" placeholder="Recipient username">
-    <input type="text" id="message" placeholder="Message">
-    <button onclick="sendChatMessage()">Send</button>
+    <div class="container">
+        <h1>Chat Interface</h1>
+        <div id="chat-container"></div>
+        <input type="text" id="message" placeholder="Message" style="width: calc(100% - 80px);">
+        <button onclick="sendChatMessage()">Send</button>
+
+    </div>
 
     <script>
         // Function to display chat messages
@@ -114,53 +211,84 @@ mysqli_close($connection);
 
             for (var i = 0; i < messages.length; i++) {
                 var message = messages[i];
-                var sender = message.sender;
+                var userOnSide = message.sender;
                 var recipient = message.recipient;
                 var text = message.message;
                 var timestamp = message.timestamp;
 
                 var messageElement = document.createElement('div');
                 messageElement.classList.add('message');
-                messageElement.innerHTML = sender + ' to ' + recipient + ': ' + text + ' (' + timestamp + ')';
+
+                if (userOnSide === '<?php echo $sender; ?>') {
+                    messageElement.classList.add('sent');
+                } else if (userOnSide === '<?php echo $recipient; ?>') {
+                    messageElement.classList.add('received');
+                }
+
+                messageElement.innerHTML = `
+            <div class="meta"><b>${userOnSide}</b> - ${timestamp}</div>
+            <div class="content">${text}</div>
+        `;
 
                 chatContainer.appendChild(messageElement);
             }
+
+            // Scroll to the bottom of the chat container
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
+
+        // Function to send a new chat message
         // Function to send a new chat message
         function sendChatMessage() {
-            var sender = document.getElementById('sender').value;
-            var recipient = document.getElementById('recipient').value;
-            var message = document.getElementById('message').value;
+            var sender = '<?php echo $sender; ?>';
+            var recipient = '<?php echo $recipient; ?>';
+            var message = document.getElementById('message').value.trim();
 
-            // Send the chat message to the server using AJAX or fetch
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', 'send_chat_message.php'); // Replace 'send_chat_message.php' with the actual server-side script
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status === 200) {
-                        console.log(xhr.responseText);
-                        fetchChatMessages(); // Fetch chat messages after sending the new message
-                    } else {
-                        console.error('Failed to send chat message.');
+            // Check if the message is not empty
+            if (message !== '') {
+                // Send the chat message to the server using AJAX or fetch
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', 'send_chat_message.php'); // Replace 'send_chat_message.php' with the actual server-side script
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === XMLHttpRequest.DONE) {
+                        if (xhr.status === 200) {
+                            console.log(xhr.responseText);
+                            // Fetch updated chat messages after sending the message
+                            fetchChatMessages();
+                        } else {
+                            console.error('Failed to send chat message.');
+                        }
                     }
-                }
-            };
-            var data = 'sender=' + encodeURIComponent(sender) +
-                '&recipient=' + encodeURIComponent(recipient) +
-                '&message=' + encodeURIComponent(message);
-            xhr.send(data);
+                };
+                var data = 'sender=' + encodeURIComponent(sender) +
+                    '&recipient=' + encodeURIComponent(recipient) +
+                    '&message=' + encodeURIComponent(message);
+                xhr.send(data);
+            }
 
             // Clear the message input field
             document.getElementById('message').value = '';
         }
 
-        // Function to fetch chat messages from the server
+        // Function to handle the Enter key press event in the message input field
+        document.getElementById('message').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent the default Enter key behavior (e.g., line break)
+                sendChatMessage();
+            }
+        });
+
+        // Function to periodically fetch chat messages from the server
         function fetchChatMessages() {
+            var sender = '<?php echo $sender; ?>';
+            var recipient = '<?php echo $recipient; ?>';
+
             // Fetch the chat messages from the server using AJAX or fetch
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'fetch_chat_messages.php?sender=' + encodeURIComponent(sender) + '&recipient=' + encodeURIComponent(recipient));
+            xhr.open('GET', `fetch_chat_messages.php?sender=${encodeURIComponent(sender)}&recipient=${encodeURIComponent(recipient)}`); // Replace 'fetch_chat_messages.php' with the actual server-side script
+
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
                     if (xhr.status === 200) {
@@ -171,14 +299,13 @@ mysqli_close($connection);
                     }
                 }
             };
+
             xhr.send();
         }
 
-        // Fetch chat messages initially when the page loads
-        fetchChatMessages();
-
         // Periodically fetch chat messages every 5 seconds
-        setInterval(fetchChatMessages, 5000);
+        setInterval(fetchChatMessages, 1000);
     </script>
 </body>
+
 </html>
