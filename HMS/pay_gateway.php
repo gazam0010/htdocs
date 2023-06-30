@@ -6,7 +6,12 @@ function sanitizeInput($input)
     $input = trim($input);
     $input = stripslashes($input);
     $input = htmlspecialchars($input);
-    return $input;
+    if($input > 0){
+        return $input;
+    }else{
+        header ('Location: wallet.php?success=ERROR: Amount must be greater than Rs. 0');
+    }
+  
 }
 
 function validateInt($value)

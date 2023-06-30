@@ -229,15 +229,16 @@
     <div class="wallet-container">
 
         <!-- Popup Message -->
-        <div class="popup" id="popup-container">
-            <?php
-            if (isset($_GET['success'])) {
+        <?php
+        if (isset($_GET['success'])): ?>
+
+            <div class="popup" id="popup-container">
+                <?php
                 $message = $_GET['success'];
                 echo "<p>$message</p>";
-            }
-            ?>
-        </div>
-
+                ?>
+            </div>
+        <?php endif; ?>
         <?php
         // Database configuration
         include('config.php');
@@ -403,9 +404,9 @@
         ?>
         <div>
             <br>
-            <form class="wallet-form" method="POST" action="pay_gateway.php">
+            <form class="wallet-form" method="POST" action="pay_gateway.php" onsubmit="return validateForm()">
                 <div class="input-container">
-                    <input type="number" name="deposit_amount" placeholder="Enter deposit amount">
+                    <input type="number" id="deposit_amount" name="deposit_amount" placeholder="Enter deposit amount">
                 </div>
 
                 <div class="deposit-options">
@@ -428,12 +429,23 @@
 
     </div>
 
-</body>
+
 <script>
     setTimeout(function () {
         var popupContainer = document.getElementById('popup-container');
         popupContainer.style.opacity = '0';
     }, 5000);
-</script
+
+    function validateForm() {
+        var amountInput = document.getElementById('deposit_amount');
+        var amount = amountInput.value;
+        if (amount <= 0) {
+            alert('Deposit amount must be greater than zero.');
+            return false; 
+        }
+        return true; 
+    }
+</script>
+</body>
 
 </html>
