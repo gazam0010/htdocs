@@ -239,5 +239,4 @@ h1::after {
     opacity: 1;
     transition: opacity 0.5s;
     z-index: 9999;
-    /* Add a higher z-index value */
 }

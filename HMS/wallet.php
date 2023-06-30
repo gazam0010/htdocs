@@ -19,56 +19,32 @@
             from {
                 opacity: 0;
             }
+
             to {
                 opacity: 1;
             }
         }
 
-        /* Rest of your styles... */
-
-        /* Add animation and motion to the success message */
-        .success-message {
-            color: green;
-            margin-bottom: 20px;
-            animation: slide-in 0.5s ease-in-out;
-        }
-
-        @keyframes slide-in {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Add animation and motion to the error message */
-        .error-message {
-            color: red;
-            margin-bottom: 20px;
+        /* Add animation and motion to the popup message */
+        .popup {
+            position: fixed;
+            top: 50px;
+            right: 10px;
+            transform: translate(-50%, -50%);
+            background-color: lightgreen;
+            padding: 8px;
+            font-weight: 550;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            opacity: 1;
+            transition: opacity 0.5s;
+            z-index: 9999;
             animation: shake 0.5s ease-in-out;
         }
 
-        @keyframes shake {
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-            10%,
-            30%,
-            50%,
-            70%,
-            90% {
-                transform: translateX(-10px);
-            }
-            20%,
-            40%,
-            60%,
-            80% {
-                transform: translateX(10px);
-            }
+        .error-message {
+            color: red;
+            margin-bottom: 20px;
         }
 
         /* Add animation and motion to the transaction history table */
@@ -83,6 +59,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -147,7 +124,7 @@
             background-color: #45a049;
         }
 
-       
+
 
         /* Styles for the transaction history */
         .transaction-history {
@@ -250,8 +227,17 @@
 
 <body>
     <div class="wallet-container">
-        <div class="success-message">
-            asdsa</div>
+
+        <!-- Popup Message -->
+        <div class="popup" id="popup-container">
+            <?php
+            if (isset($_GET['success'])) {
+                $message = $_GET['success'];
+                echo "<p>$message</p>";
+            }
+            ?>
+        </div>
+
         <?php
         // Database configuration
         include('config.php');
@@ -277,7 +263,7 @@
 
 
         // Get the user ID in config file
-
+        
         // Get the wallet balance for the user
         $stmt = $connection->prepare("SELECT balance FROM wallets WHERE pid = ?");
         $stmt->bind_param("i", $userId);
@@ -370,7 +356,7 @@
 
 
         // Deposit funds into the wallet
-       
+        
 
         // Withdraw funds from the wallet - POSTED from other page
         if (isset($_POST['withdraw_amount'])) {
@@ -443,5 +429,11 @@
     </div>
 
 </body>
+<script>
+    setTimeout(function () {
+        var popupContainer = document.getElementById('popup-container');
+        popupContainer.style.opacity = '0';
+    }, 5000);
+</script
 
 </html>

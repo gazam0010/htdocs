@@ -15,16 +15,14 @@ function validateInt($value)
 }
 
 if (isset($_POST['deposit'])) {
-
-    // Sanitize and validate the deposit amount
     $amount = sanitizeInput($_POST['deposit_amount']);
     $deposit_option = $_POST['deposit_option'];
+    
     if ($amount && validateInt($amount)) {
-
         $stmt = $connection->prepare("UPDATE wallets SET balance = balance + ?  WHERE pid = ?");
         $stmt->bind_param("ii", $amount, $userId);
+        
         if ($stmt->execute()) {
-
             $stmt = $connection->prepare("INSERT INTO transactions (pid, amount, remark, type) VALUES (?, ?, ?, 'credit')");
             $stmt->bind_param("ids", $userId, $amount, $deposit_option);
             $stmt->execute();
@@ -55,10 +53,10 @@ if (isset($_POST['deposit'])) {
                     </div>
                   </div>';
 
-            // Redirect to wallet.php after 3 seconds using JavaScript setTimeout and header() function
+            // Redirect to wallet.php after 3 seconds using JavaScript setTimeout
             echo '<script>
                     setTimeout(function() {
-                        window.location.href = "wallet.php?success=1";
+                        window.location.href = "wallet.php?success=Amount successfully deposited.";
                     }, 3000);
                   </script>';
 
