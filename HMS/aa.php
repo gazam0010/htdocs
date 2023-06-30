@@ -1,14 +1,14 @@
 <?php
 session_start();
 
-$pid = 23;
+$pid = 5001;
 date_default_timezone_set('Asia/Kolkata');
 $date = date('d/m/Y h:i:s a', time());
 
 $db1 = mysqli_connect("localhost", "root", "", "test");
 
 // Fetching wallet balance
-$queryWalletBal = mysqli_query($db1, "SELECT balance FROM wallets WHERE pid = $pid LIMIT 1");
+$queryWalletBal = mysqli_query($db1, "SELECT balance FROM wallets WHERE user_id = $pid LIMIT 1");
 $walletBalArray = mysqli_fetch_assoc($queryWalletBal);
 $wallet_balance = $walletBalArray['balance'];
 
@@ -57,7 +57,7 @@ function getLastAppointmentId($db)
 
 function insertAppointment($tx_id, $db, $aid, $pid, $did, $apt_dt, $status, $description, $book_date, $bp, $glucose, $pulse, $weight, $height, $bmi, $wallet_balance)
 {
-    $query3 = "UPDATE wallets SET balance = balance - 300 WHERE pid = ?";
+    $query3 = "UPDATE wallets SET balance = balance - 300 WHERE user_id = ?";
     $query4 = "INSERT INTO transactions (pid, type, amount, remark) VALUES (?, 'debit', '300', CONCAT('Appointment (ID - ', ?, ')'))";
     $query1 = "INSERT INTO appointments (aid, pid, did, apt_date_time, status, description, book_date, transaction_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $query2 = "INSERT INTO vitals (pid, bp, pulse, glucose, weight, height, bmi, aid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";

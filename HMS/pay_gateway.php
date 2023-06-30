@@ -24,7 +24,7 @@ if (isset($_POST['deposit'])) {
     $deposit_option = $_POST['deposit_option'];
     
     if ($amount && validateInt($amount)) {
-        $stmt = $connection->prepare("UPDATE wallets SET balance = balance + ?  WHERE pid = ?");
+        $stmt = $connection->prepare("UPDATE wallets SET balance = balance + ?  WHERE user_id = ?");
         $stmt->bind_param("ii", $amount, $userId);
         
         if ($stmt->execute()) {

@@ -97,7 +97,7 @@
             <th>Actions</th>
         </tr>
         <?php
-        $did = 6;
+        $did = 9001;
         $db1 = mysqli_connect("localhost", "root", "", "test");
         $resultApt = mysqli_query($db1, "SELECT * FROM appointments app JOIN patient p ON app.pid = p.pid WHERE app.did = $did ORDER BY aid");
         while ($row = mysqli_fetch_assoc($resultApt)) {

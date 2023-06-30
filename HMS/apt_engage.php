@@ -117,6 +117,10 @@ if (isset($_POST['complete_apt'])) {
 
         <div class="box">
 
+        <div class="age">Patient Age and Gender: <span id="age">
+                    <?php echo $row['age'].'/'.$row['pgender']; ?>
+                </span></div>
+
             <div class="appointment-id">Appointment ID: <span id="appointment-id">
                     <?php echo $aid; ?>
                 </span></div>

@@ -14,5 +14,5 @@ $connection = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME);
         // if (isset($_SESSION['user_id'])) {
         //     $userId = $_SESSION['user_id'];
         
-        $userId = 23;
+        $userId = 5001;
 ?>
