@@ -25,9 +25,17 @@ if (isset($_POST['apt_book'])) {
     $height = $_POST['height'];
     $bmi = $weight / ($height * $height);
 
+    //Fetching last transaction ID
+    function fetchLastTxId($db)
+    {
+        $txnIDsql = mysqli_query($db, "select MAX(`id`) as max_id FROM transactions");
+        $row = mysqli_fetch_assoc($txnIDsql);
+        return $row["max_id"] + 1;
+    }
+
     //If wallet balance is greater than or equal to appointment fees
     if ($wallet_balance >= 300) {
-        $result = insertAppointment($db1, $aid, $pid, $did, $apt_dt, $status, $description, $date, $glucose, $bp, $pulse, $weight, $height, $bmi, $wallet_balance);
+        $result = insertAppointment(fetchLastTxId($db1), $db1, $aid, $pid, $did, $apt_dt, $status, $description, $date, $glucose, $bp, $pulse, $weight, $height, $bmi, $wallet_balance);
         if ($result) {
             header("location: aa.php?success-booked=1&aid=" . $aid . "");
             exit();
@@ -47,28 +55,29 @@ function getLastAppointmentId($db)
     return $fetchId['max_aid'];
 }
 
-function insertAppointment($db, $aid, $pid, $did, $apt_dt, $status, $description, $book_date, $bp, $glucose, $pulse, $weight, $height, $bmi, $wallet_balance)
+function insertAppointment($tx_id, $db, $aid, $pid, $did, $apt_dt, $status, $description, $book_date, $bp, $glucose, $pulse, $weight, $height, $bmi, $wallet_balance)
 {
-    $query1 = "INSERT INTO appointments (aid, pid, did, apt_date_time, status, description, book_date) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    $query2 = "INSERT INTO vitals (pid, bp, pulse, glucose, weight, height, bmi, aid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $query3 = "UPDATE wallets SET balance = balance - 300 WHERE pid = ?";
     $query4 = "INSERT INTO transactions (pid, type, amount, remark) VALUES (?, 'debit', '300', CONCAT('Appointment (ID - ', ?, ')'))";
+    $query1 = "INSERT INTO appointments (aid, pid, did, apt_date_time, status, description, book_date, transaction_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    $query2 = "INSERT INTO vitals (pid, bp, pulse, glucose, weight, height, bmi, aid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-    $stmt1 = mysqli_prepare($db, $query1);
-    $stmt2 = mysqli_prepare($db, $query2);
     $stmt3 = mysqli_prepare($db, $query3);
     $stmt4 = mysqli_prepare($db, $query4);
+    $stmt1 = mysqli_prepare($db, $query1);
+    $stmt2 = mysqli_prepare($db, $query2);
 
-    mysqli_stmt_bind_param($stmt1, 'iiissss', $aid, $pid, $did, $apt_dt, $status, $description, $book_date);
-    mysqli_stmt_bind_param($stmt2, 'issssssi', $pid, $bp, $pulse, $glucose, $weight, $height, $bmi, $aid);
     mysqli_stmt_bind_param($stmt3, 'i', $pid);
     mysqli_stmt_bind_param($stmt4, 'ii', $pid, $aid);
+    mysqli_stmt_bind_param($stmt1, 'iiissssi', $aid, $pid, $did, $apt_dt, $status, $description, $book_date, $tx_id);
+    mysqli_stmt_bind_param($stmt2, 'issssssi', $pid, $bp, $pulse, $glucose, $weight, $height, $bmi, $aid);
 
-    if (mysqli_stmt_execute($stmt1) && mysqli_stmt_execute($stmt2) && mysqli_stmt_execute($stmt3) && mysqli_stmt_execute($stmt4)) {
+    if (mysqli_stmt_execute($stmt3) && mysqli_stmt_execute($stmt4) && mysqli_stmt_execute($stmt1) && mysqli_stmt_execute($stmt2)) {
         return true;
     } else {
         return false;
     }
+
 
 }
 
@@ -284,7 +293,7 @@ Appointment successfully booked with Appointment ID: ' . $_GET['aid'] . '
                     hiddenDiv.classList.add('hidden');
                 }, 500);
             }
-        });
+    });
     </script>
 </body>
 

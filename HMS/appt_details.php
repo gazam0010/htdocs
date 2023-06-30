@@ -287,6 +287,10 @@
             <p>
                 <?php echo $row['description']; ?>
             </p>
+            <p><strong>Transaction ID:</strong></p>
+            <p>
+                <?php echo $row['transaction_id']; ?>
+            </p>
         </div>
         <br>
         <hr><br>
