@@ -7,6 +7,11 @@ $date = date('d/m/Y h:i:s a', time());
 
 $db1 = mysqli_connect("localhost", "root", "", "test");
 
+// Fetching wallet balance
+$queryWalletBal = mysqli_query($db1, "SELECT balance FROM wallets WHERE pid = $pid LIMIT 1");
+$walletBalArray = mysqli_fetch_assoc($queryWalletBal);
+$wallet_balance = $walletBalArray['balance'];
+
 if (isset($_POST['apt_book'])) {
     $aid = getLastAppointmentId($db1) + 1;
     $did = $_POST['radio-option'];
@@ -20,12 +25,18 @@ if (isset($_POST['apt_book'])) {
     $height = $_POST['height'];
     $bmi = $weight / ($height * $height);
 
-    $result = insertAppointment($db1, $aid, $pid, $did, $apt_dt, $status, $description, $date, $glucose, $bp, $pulse, $weight, $height, $bmi);
-    if ($result) {
-        header("location: aa.php?success-booked=1&aid=" . $aid . "");
-        exit();
+    //If wallet balance is greater than or equal to appointment fees
+    if ($wallet_balance >= 300) {
+        $result = insertAppointment($db1, $aid, $pid, $did, $apt_dt, $status, $description, $date, $glucose, $bp, $pulse, $weight, $height, $bmi, $wallet_balance);
+        if ($result) {
+            header("location: aa.php?success-booked=1&aid=" . $aid . "");
+            exit();
+        } else {
+            echo "Some error occurred";
+        }
     } else {
-        echo "Some error occurred";
+        header("location: aa.php?return-msg=ERROR: Wallet balance insufficient");
+        exit();
     }
 }
 
@@ -36,21 +47,29 @@ function getLastAppointmentId($db)
     return $fetchId['max_aid'];
 }
 
-function insertAppointment($db, $aid, $pid, $did, $apt_dt, $status, $description, $book_date, $bp, $glucose, $pulse, $weight, $height, $bmi)
+function insertAppointment($db, $aid, $pid, $did, $apt_dt, $status, $description, $book_date, $bp, $glucose, $pulse, $weight, $height, $bmi, $wallet_balance)
 {
-    $query = "
-    INSERT INTO appointments (aid, pid, did, apt_date_time, status, description, book_date)
-    VALUES ('$aid', '$pid', '$did', '$apt_dt', '$status', '$description', '$book_date');
-    
-    INSERT INTO vitals (pid, bp, pulse, glucose, weight, height, bmi, aid)
-    VALUES ('$pid', '$bp', '$pulse', '$glucose', '$weight', '$height', '$bmi', '$aid')
-";
+    $query1 = "INSERT INTO appointments (aid, pid, did, apt_date_time, status, description, book_date) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $query2 = "INSERT INTO vitals (pid, bp, pulse, glucose, weight, height, bmi, aid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    $query3 = "UPDATE wallets SET balance = balance - 300 WHERE pid = ?";
+    $query4 = "INSERT INTO transactions (pid, type, amount, remark) VALUES (?, 'debit', '300', CONCAT('Appointment (ID - ', ?, ')'))";
 
-    if (mysqli_multi_query($db, $query)) {
+    $stmt1 = mysqli_prepare($db, $query1);
+    $stmt2 = mysqli_prepare($db, $query2);
+    $stmt3 = mysqli_prepare($db, $query3);
+    $stmt4 = mysqli_prepare($db, $query4);
+
+    mysqli_stmt_bind_param($stmt1, 'iiissss', $aid, $pid, $did, $apt_dt, $status, $description, $book_date);
+    mysqli_stmt_bind_param($stmt2, 'issssssi', $pid, $bp, $pulse, $glucose, $weight, $height, $bmi, $aid);
+    mysqli_stmt_bind_param($stmt3, 'i', $pid);
+    mysqli_stmt_bind_param($stmt4, 'ii', $pid, $aid);
+
+    if (mysqli_stmt_execute($stmt1) && mysqli_stmt_execute($stmt2) && mysqli_stmt_execute($stmt3) && mysqli_stmt_execute($stmt4)) {
         return true;
     } else {
         return false;
     }
+
 }
 
 ?>
@@ -186,9 +205,13 @@ Appointment successfully booked with Appointment ID: ' . $_GET['aid'] . '
                     <label for="time">Select a time: </label>
                     <input type="time" style="font-size: 180%" id="time" name="time" required><br><br><br>
 
-                    <label for="description">Description: </label><br>
-                    <textarea id="description" name="description" type="textarea" rows="4"
-                        cols="40"></textarea><br><br><br>
+                    <label for="description">Description: </label>
+                    <textarea id="description" name="description" type="textarea" rows="4" cols="40"></textarea><br><br>
+                    Appointment Charge: <strong>Rs. 300</strong> <br>
+                    Wallet Balance: <strong>
+                        <?php echo $walletBalArray['balance']; ?>
+                    </strong>
+                    <br>
                 </div>
 
                 <input class="but" type="submit" name="apt_book" value="Book Appointment">
