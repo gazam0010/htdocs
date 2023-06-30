@@ -9,6 +9,7 @@ $connection = mysqli_connect($host, $username, $password, $database);
 if (!$connection) {
     die("Failed to connect to the database: " . mysqli_connect_error());
 }
+
 function decryptMessage($encryptedData, $key)
 {
     $data = base64_decode($encryptedData);
@@ -19,27 +20,31 @@ function decryptMessage($encryptedData, $key)
     return $decryptedMessage;
 }
 
-function getChatMessages($chatId, $sender, $recipient) {
+function getChatMessages($chatId, $sender, $recipient)
+{
     global $connection;
-    
-    $sender = mysqli_real_escape_string($connection, $sender);
-    $recipient = mysqli_real_escape_string($connection, $recipient);
-    
+
     $query = "SELECT sender, recipient, message, timestamp
               FROM chat_messages
-              WHERE (sender = '$sender' AND recipient = '$recipient' AND chat_id = '$chatId')
-              OR (sender = '$recipient' AND recipient = '$sender' AND chat_id = '$chatId')
+              WHERE (sender = ? AND recipient = ? AND chat_id = ?)
+              OR (sender = ? AND recipient = ? AND chat_id = ?)
               ORDER BY timestamp ASC";
-    
-    $result = mysqli_query($connection, $query);
-    
+
+    $stmt = mysqli_prepare($connection, $query);
+    mysqli_stmt_bind_param($stmt, 'ssssss', $sender, $recipient, $chatId, $recipient, $sender, $chatId);
+    mysqli_stmt_execute($stmt);
+
+    $result = mysqli_stmt_get_result($stmt);
+
     // Fetch and return the chat messages
     $messages = [];
     while ($row = mysqli_fetch_assoc($result)) {
         $row['message'] = decryptMessage($row['message'], 'FreakAzam9xbdxf5Gx1e8lxf8xc7A23b8C19d6E47F5');
         $messages[] = $row;
     }
-    
+
+    mysqli_stmt_close($stmt);
+
     return $messages;
 }
 

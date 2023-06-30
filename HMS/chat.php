@@ -1,6 +1,4 @@
 <?php
-
-
 $host = 'localhost';
 $database = 'test';
 $username = 'root';
