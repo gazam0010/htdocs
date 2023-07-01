@@ -159,11 +159,7 @@
             echo '<div class="error-message">No transaction history found.</div>';
         }
         echo '</div>';
-
-
         
-        
-
         // Withdraw funds from the wallet
         if (isset($_POST['withdraw_amount'])) {
             $amount = sanitizeInput($_POST['amount']);
