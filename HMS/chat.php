@@ -1,13 +1,6 @@
 <?php
-$host = 'localhost';
-$database = 'test';
-$username = 'root';
-$password = '';
-
-$connection = mysqli_connect($host, $username, $password, $database);
-if (!$connection) {
-    die("Failed to connect to the database: " . mysqli_connect_error());
-}
+require_once 'config.php';
+session_start();
 
 if (isset($_POST['start_chat'])) {
 

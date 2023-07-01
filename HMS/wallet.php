@@ -47,7 +47,7 @@
         // Get the user ID in config file
         
         // Get the wallet balance for the user
-        $stmt = $connection->prepare("SELECT balance FROM wallets WHERE user_id = ?");
+        $stmt = $connection->prepare("SELECT balance FROM patient WHERE pid = ?");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -68,7 +68,7 @@
         <div class="transaction-table-container">';
 
         // Fetch transaction history for the user
-        $stmt = $connection->prepare("SELECT * FROM transactions WHERE pid = ?");
+        $stmt = $connection->prepare("SELECT * FROM transactions WHERE user_id = ?");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -141,41 +141,41 @@
         
 
         // Withdraw funds from the wallet - POSTED from other page
-        if (isset($_POST['withdraw_amount'])) {
-            $amount = sanitizeInput($_POST['withdraw_amount']);
-            if ($amount && validateInt($amount)) {
-                // Check if the user has sufficient balance
-                $stmt = $connection->prepare("SELECT balance FROM wallets WHERE user_id = ?");
-                $stmt->bind_param("i", $userId);
-                $stmt->execute();
-                $result = $stmt->get_result();
+        // if (isset($_POST['withdraw_amount'])) {
+        //     $amount = sanitizeInput($_POST['withdraw_amount']);
+        //     if ($amount && validateInt($amount)) {
+        //         // Check if the user has sufficient balance
+        //         $stmt = $connection->prepare("SELECT balance FROM wallets WHERE user_id = ?");
+        //         $stmt->bind_param("i", $userId);
+        //         $stmt->execute();
+        //         $result = $stmt->get_result();
 
-                if ($result->num_rows > 0) {
-                    $row = $result->fetch_assoc();
-                    $balance = $row['balance'];
+        //         if ($result->num_rows > 0) {
+        //             $row = $result->fetch_assoc();
+        //             $balance = $row['balance'];
 
-                    if ($balance >= $amount) {
-                        // Sufficient balance, proceed with the withdrawal
-                        $stmt = $connection->prepare("UPDATE wallets SET balance = balance - ? WHERE user_id = ?");
-                        $stmt->bind_param("ii", $amount, $userId);
-                        if ($stmt->execute()) {
-                            // Insert transaction record into the transactions table
-                            $stmt = $connection->prepare("INSERT INTO transactions (pid, amount, type) VALUES (?, ?, 'debit')");
-                            $stmt->bind_param("ii", $userId, $amount);
-                            $stmt->execute();
-                            header("Location: wallet.php");
-                            exit();
-                        } else {
-                            echo '<div class="error-message">Error updating wallet balance: ' . $connection->error . '</div>';
-                        }
-                    } else {
-                        echo '<div class="error-message">Insufficient balance.</div>';
-                    }
-                } else {
-                    echo '<div class="error-message">No wallet found for the patient.</div>';
-                }
-            }
-        }
+        //             if ($balance >= $amount) {
+        //                 // Sufficient balance, proceed with the withdrawal
+        //                 $stmt = $connection->prepare("UPDATE wallets SET balance = balance - ? WHERE user_id = ?");
+        //                 $stmt->bind_param("ii", $amount, $userId);
+        //                 if ($stmt->execute()) {
+        //                     // Insert transaction record into the transactions table
+        //                     $stmt = $connection->prepare("INSERT INTO transactions (user_id, amount, type) VALUES (?, ?, 'debit')");
+        //                     $stmt->bind_param("ii", $userId, $amount);
+        //                     $stmt->execute();
+        //                     header("Location: wallet.php");
+        //                     exit();
+        //                 } else {
+        //                     echo '<div class="error-message">Error updating wallet balance: ' . $connection->error . '</div>';
+        //                 }
+        //             } else {
+        //                 echo '<div class="error-message">Insufficient balance.</div>';
+        //             }
+        //         } else {
+        //             echo '<div class="error-message">No wallet found for the patient.</div>';
+        //         }
+        //     }
+        // }
         // } else {
         //     echo '<div class="error-message">User not logged in.</div>';
         // }

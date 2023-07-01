@@ -1,22 +1,14 @@
 <?php
-$host = 'localhost';
-$database = 'test';
-$username = 'root';
-$password = '';
-
-$connection = mysqli_connect($host, $username, $password, $database);
-
-if (!$connection) {
-    die("Failed to connect to the database: " . mysqli_connect_error());
-}
-
+require_once 'config.php';
+session_start();
 if (isset($_POST['start_chat'])) {
 
     $sender = $_POST['sender'];
     $aid = $_POST['aid'];
     $recipient = $_POST['recipient'];
     $chatId = $_POST['chatId'];
-    //check if chat active?
+
+    //check if chat is active?
     $chatResult = mysqli_query($connection, "SELECT * FROM chat_status WHERE chat_id = '$chatId'");
     $rowChat = mysqli_fetch_assoc($chatResult);
 
@@ -60,7 +52,7 @@ function decryptMessage($encryptedData, $key)
     return $decryptedMessage;
 }
 
-// Check if the chat form was submitted
+
 if (isset($_POST['sender'], $_POST['recipient'], $_POST['message'])) {
     $sender = $_POST['sender'];
     $recipient = $_POST['recipient'];
@@ -221,7 +213,7 @@ mysqli_close($connection);
         // Function to display chat messages
         function displayChatMessages(messages) {
             var chatContainer = document.getElementById('chat-container');
-            chatContainer.innerHTML = ''; // Clear previous messages
+            chatContainer.innerHTML = '';
 
             for (var i = 0; i < messages.length; i++) {
                 var message = messages[i];
@@ -266,7 +258,6 @@ mysqli_close($connection);
                     if (xhr.readyState === XMLHttpRequest.DONE) {
                         if (xhr.status === 200) {
                             console.log(xhr.responseText);
-                            // Fetch updated chat messages after sending the message
                             fetchChatMessages();
                         } else {
                             console.error('Failed to send chat message.');
@@ -308,7 +299,7 @@ mysqli_close($connection);
             xhr.send();
         }
 
-        // Periodically fetch chat messages every 1 seconds
+        // Periodically fetch chat messages every 1 second
         setInterval(fetchChatMessages, 1000);
     </script>
 </body>

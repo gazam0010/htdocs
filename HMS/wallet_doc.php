@@ -4,6 +4,29 @@
 <head>
     <title>Wallet Management</title>
     <link rel="stylesheet" href="wallet.css?">
+    <style>
+        .withdraw_funds label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .withdraw_funds input[type="text"],
+        .withdraw_funds input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s ease-in-out;
+        }
+
+        .withdraw_funds input[type="text"]:focus,
+        .withdraw_funds input[type="number"]:focus {
+            border-color: #6c63ff;
+            outline: none;
+        }
+    </style>
+
 </head>
 
 <body>
@@ -23,6 +46,7 @@
         <?php
         // Database configuration
         include('config.php');
+        $userId = 9001;
 
         // Validate and sanitize user input
         if ($connection->connect_error) {
@@ -47,7 +71,7 @@
         // Get the user ID in config file
         
         // Get the wallet balance for the user
-        $stmt = $connection->prepare("SELECT balance FROM wallets WHERE user_id = ?");
+        $stmt = $connection->prepare("SELECT balance FROM doctorprofile WHERE did = ?");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -68,7 +92,7 @@
         <div class="transaction-table-container">';
 
         // Fetch transaction history for the user
-        $stmt = $connection->prepare("SELECT * FROM transactions WHERE pid = ?");
+        $stmt = $connection->prepare("SELECT * FROM transactions WHERE user_id = ?");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -140,12 +164,15 @@
         // Deposit funds into the wallet
         
 
-        // Withdraw funds from the wallet - POSTED from other page
+        // Withdraw funds from the wallet
         if (isset($_POST['withdraw_amount'])) {
-            $amount = sanitizeInput($_POST['withdraw_amount']);
+            $amount = sanitizeInput($_POST['amount']);
+            $account_number = sanitizeInput($_POST['account_number']);
+            $ifsc = sanitizeInput($_POST['ifsc']);
+            $remark = 'Ac/No: ' . $account_number . '. IFSC: ' . $ifsc;
             if ($amount && validateInt($amount)) {
                 // Check if the user has sufficient balance
-                $stmt = $connection->prepare("SELECT balance FROM wallets WHERE user_id = ?");
+                $stmt = $connection->prepare("SELECT balance FROM doctorprofile WHERE did = ?");
                 $stmt->bind_param("i", $userId);
                 $stmt->execute();
                 $result = $stmt->get_result();
@@ -156,14 +183,14 @@
 
                     if ($balance >= $amount) {
                         // Sufficient balance, proceed with the withdrawal
-                        $stmt = $connection->prepare("UPDATE wallets SET balance = balance - ? WHERE user_id = ?");
+                        $stmt = $connection->prepare("UPDATE doctorprofile SET balance = balance - ? WHERE did = ?");
                         $stmt->bind_param("ii", $amount, $userId);
                         if ($stmt->execute()) {
                             // Insert transaction record into the transactions table
-                            $stmt = $connection->prepare("INSERT INTO transactions (pid, amount, type) VALUES (?, ?, 'debit')");
-                            $stmt->bind_param("ii", $userId, $amount);
+                            $stmt = $connection->prepare("INSERT INTO transactions (user_id, amount, type, remark) VALUES (?, ?, 'debit', ?)");
+                            $stmt->bind_param("iis", $userId, $amount, $remark);
                             $stmt->execute();
-                            header("Location: wallet.php");
+                            header("Location: wallet_doc.php?success=Amount successfully withdrawn.");
                             exit();
                         } else {
                             echo '<div class="error-message">Error updating wallet balance: ' . $connection->error . '</div>';
@@ -185,48 +212,44 @@
         ?>
         <div>
             <br>
-            <form class="wallet-form" method="POST" action="pay_gateway.php" onsubmit="return validateForm()">
+            <h3>Withdraw Funds</h3>
+            <form class="wallet-form" method="POST" action="" onsubmit="return validateForm()">
                 <div class="input-container">
-                    <input type="number" id="deposit_amount" name="deposit_amount" placeholder="Enter deposit amount">
+                    <input type="number" id="amount" name="amount" placeholder="Enter amount">
                 </div>
 
-                <div class="deposit-options">
-                    <h3>Deposit Options</h3>
-                    <input type="radio" name="deposit_option" id="upi_option" value="UPI">
-                    <label for="upi_option">UPI</label>
-                    <br>
-                    <input type="radio" name="deposit_option" id="credit_card_option" value="Credit Card" required>
-                    <label for="credit_card_option">Credit Card</label>
-                    <br>
-                    <input type="radio" name="deposit_option" id="debit_card_option" value="Debit Card" required>
-                    <label for="debit_card_option">Debit Card</label>
-                    <br>
-                    <input type="radio" name="deposit_option" id="net_banking_option" value="Net Banking" required>
-                    <label for="net_banking_option">Net Banking</label>
+                <div class="withdraw_funds">
+                    <label for="account_number">Account Number:</label>
+                    <input type="text" id="account_number" name="account_number" placeholder="Account Number">
+
+                    <label for="ifsc">IFSC:</label>
+                    <input type="text" id="ifsc" name="ifsc" placeholder="IFSC">
                 </div>
-                <input name="deposit" type="submit" value="Deposit">
+
+                <input name="withdraw_amount" type="submit" value="Withdraw">
             </form>
+
         </div>
 
     </div>
 
 
-<script>
-    setTimeout(function () {
-        var popupContainer = document.getElementById('popup-container');
-        popupContainer.style.opacity = '0';
-    }, 5000);
+    <script>
+        setTimeout(function () {
+            var popupContainer = document.getElementById('popup-container');
+            popupContainer.style.opacity = '0';
+        }, 5000);
 
-    function validateForm() {
-        var amountInput = document.getElementById('deposit_amount');
-        var amount = amountInput.value;
-        if (amount <= 0) {
-            alert('Deposit amount must be greater than zero.');
-            return false; 
+        function validateForm() {
+            var amountInput = document.getElementById('deposit_amount');
+            var amount = amountInput.value;
+            if (amount <= 0) {
+                alert('Deposit amount must be greater than zero.');
+                return false;
+            }
+            return true;
         }
-        return true; 
-    }
-</script>
+    </script>
 </body>
 
 </html>

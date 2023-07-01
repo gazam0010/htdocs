@@ -8,7 +8,7 @@ $date = date('d/m/Y h:i:s a', time());
 $db1 = mysqli_connect("localhost", "root", "", "test");
 
 // Fetching wallet balance
-$queryWalletBal = mysqli_query($db1, "SELECT balance FROM wallets WHERE user_id = $pid LIMIT 1");
+$queryWalletBal = mysqli_query($db1, "SELECT balance FROM patient WHERE pid = $pid");
 $walletBalArray = mysqli_fetch_assoc($queryWalletBal);
 $wallet_balance = $walletBalArray['balance'];
 
@@ -57,29 +57,51 @@ function getLastAppointmentId($db)
 
 function insertAppointment($tx_id, $db, $aid, $pid, $did, $apt_dt, $status, $description, $book_date, $bp, $glucose, $pulse, $weight, $height, $bmi, $wallet_balance)
 {
-    $query3 = "UPDATE wallets SET balance = balance - 300 WHERE user_id = ?";
-    $query4 = "INSERT INTO transactions (pid, type, amount, remark) VALUES (?, 'debit', '300', CONCAT('Appointment (ID - ', ?, ')'))";
+    mysqli_begin_transaction($db);
+
+    $query3 = "UPDATE patient SET balance = balance - 300 WHERE pid = ?";
+    $query5 = "UPDATE doctorprofile SET balance = balance + 300 WHERE did = ?";
+    $query4 = "INSERT INTO transactions (user_id, type, amount, remark) VALUES (?, 'debit', '300', CONCAT('Appointment (ID - ', ?, ')'))";
+    $query6 = "INSERT INTO transactions (user_id, type, amount, remark) VALUES (?, 'credit', '300', CONCAT('Appointment (ID - ', ?, ')'))";
     $query1 = "INSERT INTO appointments (aid, pid, did, apt_date_time, status, description, book_date, transaction_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $query2 = "INSERT INTO vitals (pid, bp, pulse, glucose, weight, height, bmi, aid) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
     $stmt3 = mysqli_prepare($db, $query3);
     $stmt4 = mysqli_prepare($db, $query4);
+    $stmt6 = mysqli_prepare($db, $query6);
     $stmt1 = mysqli_prepare($db, $query1);
     $stmt2 = mysqli_prepare($db, $query2);
+    $stmt5 = mysqli_prepare($db, $query5);
 
     mysqli_stmt_bind_param($stmt3, 'i', $pid);
+    mysqli_stmt_bind_param($stmt5, 'i', $did);
     mysqli_stmt_bind_param($stmt4, 'ii', $pid, $aid);
+    mysqli_stmt_bind_param($stmt6, 'ii', $did, $aid);
     mysqli_stmt_bind_param($stmt1, 'iiissssi', $aid, $pid, $did, $apt_dt, $status, $description, $book_date, $tx_id);
     mysqli_stmt_bind_param($stmt2, 'issssssi', $pid, $bp, $pulse, $glucose, $weight, $height, $bmi, $aid);
 
-    if (mysqli_stmt_execute($stmt3) && mysqli_stmt_execute($stmt4) && mysqli_stmt_execute($stmt1) && mysqli_stmt_execute($stmt2)) {
-        return true;
-    } else {
-        return false;
+    $success = true;
+
+    if (
+        !mysqli_stmt_execute($stmt3) ||
+        !mysqli_stmt_execute($stmt4) ||
+        !mysqli_stmt_execute($stmt6) ||
+        !mysqli_stmt_execute($stmt1) ||
+        !mysqli_stmt_execute($stmt2) ||
+        !mysqli_stmt_execute($stmt5)
+    ) {
+        $success = false;
     }
 
-
+    if ($success) {
+        mysqli_commit($db);
+        return true;
+    } else {
+        mysqli_rollback($db);
+        return false;
+    }
 }
+
 
 ?>
 
@@ -293,7 +315,7 @@ Appointment successfully booked with Appointment ID: ' . $_GET['aid'] . '
                     hiddenDiv.classList.add('hidden');
                 }, 500);
             }
-    });
+        });
     </script>
 </body>
 

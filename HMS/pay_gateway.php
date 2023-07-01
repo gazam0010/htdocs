@@ -24,11 +24,11 @@ if (isset($_POST['deposit'])) {
     $deposit_option = $_POST['deposit_option'];
     
     if ($amount && validateInt($amount)) {
-        $stmt = $connection->prepare("UPDATE wallets SET balance = balance + ?  WHERE user_id = ?");
+        $stmt = $connection->prepare("UPDATE patient SET balance = balance + ?  WHERE pid = ?");
         $stmt->bind_param("ii", $amount, $userId);
         
         if ($stmt->execute()) {
-            $stmt = $connection->prepare("INSERT INTO transactions (pid, amount, remark, type) VALUES (?, ?, ?, 'credit')");
+            $stmt = $connection->prepare("INSERT INTO transactions (user_id, amount, remark, type) VALUES (?, ?, ?, 'credit')");
             $stmt->bind_param("ids", $userId, $amount, $deposit_option);
             $stmt->execute();
 
