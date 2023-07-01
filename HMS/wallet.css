@@ -1,218 +1,225 @@
   /* Styles for the wallet container */
   .wallet-container {
-    width: 500px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f2f2f2;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    animation: fade-in 0.5s ease-in-out;
-}
+      width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f2f2f2;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      animation: fade-in 0.5s ease-in-out;
+  }
 
-@keyframes fade-in {
-    from {
-        opacity: 0;
-    }
+  @keyframes fade-in {
+      from {
+          opacity: 0;
+      }
 
-    to {
-        opacity: 1;
-    }
-}
+      to {
+          opacity: 1;
+      }
+  }
 
-/* Add animation and motion to the popup message */
-.popup {
-    position: fixed;
-    top: 50px;
-    right: 10px;
-    transform: translate(-50%, -50%);
+  /* Add animation and motion to the popup message */
+  .popup {
+      position: fixed;
+      top: 50px;
+      right: 10px;
+      transform: translate(-50%, -50%);
+      padding: 8px;
+      font-weight: 550;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      opacity: 1;
+      transition: opacity 0.5s;
+      z-index: 9999;
+      animation: shake 0.5s ease-in-out;
+  }
+
+  .success {
     background-color: lightgreen;
-    padding: 8px;
-    font-weight: 550;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    opacity: 1;
-    transition: opacity 0.5s;
-    z-index: 9999;
-    animation: shake 0.5s ease-in-out;
-}
+  }
 
-.error-message {
-    color: red;
-    margin-bottom: 20px;
-}
+  .failed {
+    background-color: rgb(255, 98, 0);
+  }
 
-/* Add animation and motion to the transaction history table */
-.transaction-history table {
-    width: 100%;
-    border-collapse: collapse;
-    animation: slide-up 0.5s ease-in-out;
-}
+  .error-message {
+      color: red;
+      margin-bottom: 20px;
+  }
 
-@keyframes slide-up {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
+  /* Add animation and motion to the transaction history table */
+  .transaction-history table {
+      width: 100%;
+      border-collapse: collapse;
+      animation: slide-up 0.5s ease-in-out;
+  }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
+  @keyframes slide-up {
+      from {
+          opacity: 0;
+          transform: translateY(20px);
+      }
 
-/* Styles for the wallet balance */
-.wallet-balance {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
+      to {
+          opacity: 1;
+          transform: translateY(0);
+      }
+  }
 
-/* Styles for the form */
-.wallet-form {
-    margin-bottom: 20px;
-}
+  /* Styles for the wallet balance */
+  .wallet-balance {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+  }
 
-.wallet-form .input-container {
-    position: relative;
-}
+  /* Styles for the form */
+  .wallet-form {
+      margin-bottom: 20px;
+  }
 
-.wallet-form .input-container input[type="number"] {
-    width: 80%;
-    padding: 10px 10px 10px 30px;
-    /* Adjust the padding to create space for the Rupees sign */
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
+  .wallet-form .input-container {
+      position: relative;
+  }
 
-.wallet-form .input-container::before {
-    content: "₹";
-    /* Add the Rupees sign */
-    position: absolute;
-    left: 10px;
-    /* Adjust the left position as needed */
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 16px;
-    color: #555;
-}
+  .wallet-form .input-container input[type="number"] {
+      width: 80%;
+      padding: 10px 10px 10px 30px;
+      /* Adjust the padding to create space for the Rupees sign */
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+  }
+
+  .wallet-form .input-container::before {
+      content: "₹";
+      /* Add the Rupees sign */
+      position: absolute;
+      left: 10px;
+      /* Adjust the left position as needed */
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: #555;
+  }
 
 
 
-/* Styles for the form button */
-.wallet-form input[type="submit"] {
-    width: auto;
-    padding: 8px 13px;
-    font-size: 14px;
-    background-color: #4CAF50;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    float: right;
-    margin-right: 10px;
-}
+  /* Styles for the form button */
+  .wallet-form input[type="submit"] {
+      width: auto;
+      padding: 8px 13px;
+      font-size: 14px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      float: right;
+      margin-right: 10px;
+  }
 
-.wallet-form input[type="submit"]:hover {
-    background-color: #45a049;
-}
-
-
-
-/* Styles for the transaction history */
-.transaction-history {
-    margin-top: 20px;
-    border: 1px solid #ccc;
-    padding: 10px;
-    min-height: 200px;
-    /* Set a minimum height */
-    overflow-y: auto;
-    /* Add vertical scroll if needed */
-}
+  .wallet-form input[type="submit"]:hover {
+      background-color: #45a049;
+  }
 
 
-.transaction-history table {
-    width: 100%;
-    border-collapse: collapse;
-}
 
-.transaction-history table th,
-.transaction-history table td {
-    padding: 8px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-.transaction-history table th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-}
-
-.transaction-table-container {
-    height: 180px;
-    overflow-y: auto;
-}
+  /* Styles for the transaction history */
+  .transaction-history {
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      min-height: 200px;
+      /* Set a minimum height */
+      overflow-y: auto;
+      /* Add vertical scroll if needed */
+  }
 
 
-.pagination {
-    margin-top: 10px;
-}
+  .transaction-history table {
+      width: 100%;
+      border-collapse: collapse;
+  }
 
-.page-link {
-    display: inline-block;
-    padding: 5px 10px;
-    margin-right: 5px;
-    background-color: #f2f2f2;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    text-decoration: none;
-    color: #333;
-}
+  .transaction-history table th,
+  .transaction-history table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+  }
 
-.current-page {
-    display: inline-block;
-    padding: 5px 10px;
-    margin-right: 5px;
-    background-color: #4CAF50;
-    color: #fff;
-    border: 1px solid #4CAF50;
-    border-radius: 4px;
-}
+  .transaction-history table th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+  }
 
-/* Styles for the deposit options */
-/* Styles for the deposit options */
-.deposit-options {
-    margin-top: 20px;
-}
+  .transaction-table-container {
+      height: 180px;
+      overflow-y: auto;
+  }
 
-.deposit-options h3 {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
 
-.deposit-options input[type="radio"] {
-    display: none;
-}
+  .pagination {
+      margin-top: 10px;
+  }
 
-.deposit-options label {
-    display: inline-block;
-    margin-right: 10px;
-    padding: 5px 10px;
-    font-size: 14px;
-    background-color: #f2f2f2;
-    color: #333;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    cursor: pointer;
-}
+  .page-link {
+      display: inline-block;
+      padding: 5px 10px;
+      margin-right: 5px;
+      background-color: #f2f2f2;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      text-decoration: none;
+      color: #333;
+  }
 
-.deposit-options label:hover {
-    background-color: #e0e0e0;
-}
+  .current-page {
+      display: inline-block;
+      padding: 5px 10px;
+      margin-right: 5px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: 1px solid #4CAF50;
+      border-radius: 4px;
+  }
 
-.deposit-options input[type="radio"]:checked+label {
-    background-color: #4CAF50;
-    color: #fff;
-}
+  /* Styles for the deposit options */
+  /* Styles for the deposit options */
+  .deposit-options {
+      margin-top: 20px;
+  }
+
+  .deposit-options h3 {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+  }
+
+  .deposit-options input[type="radio"] {
+      display: none;
+  }
+
+  .deposit-options label {
+      display: inline-block;
+      margin-right: 10px;
+      padding: 5px 10px;
+      font-size: 14px;
+      background-color: #f2f2f2;
+      color: #333;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+  }
+
+  .deposit-options label:hover {
+      background-color: #e0e0e0;
+  }
+
+  .deposit-options input[type="radio"]:checked+label {
+      background-color: #4CAF50;
+      color: #fff;
+  }

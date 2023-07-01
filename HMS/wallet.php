@@ -13,7 +13,7 @@
         <?php
         if (isset($_GET['success'])): ?>
 
-            <div class="popup" id="popup-container">
+            <div class="popup success" id="popup-container">
                 <?php
                 $message = $_GET['success'];
                 echo "<p>$message</p>";

@@ -32,13 +32,23 @@
 <body>
     <div class="wallet-container">
 
-        <!-- Popup Message -->
-        <?php
-        if (isset($_GET['success'])): ?>
+        <!-- Popup Message IF SUCCESS -->
+        <?php if (isset($_GET['success'])): ?>
 
-            <div class="popup" id="popup-container">
+            <div class="popup success" id="popup-container">
                 <?php
                 $message = $_GET['success'];
+                echo "<p>$message</p>";
+                ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- Popup Message IF FAILED -->
+        <?php if (isset($_GET['failed'])): ?>
+
+            <div class="popup failed" id="popup-container">
+                <?php
+                $message = $_GET['failed'];
                 echo "<p>$message</p>";
                 ?>
             </div>
@@ -65,6 +75,21 @@
         function validateInt($value)
         {
             return filter_var($value, FILTER_VALIDATE_INT) !== false;
+        }
+
+        function canWithdraw($connection, $balance, $userId, $amount)
+        {
+            $stmt1 = $connection->prepare("SELECT COUNT(*) AS count FROM appointments WHERE did = ? AND status IN ('In Progress', 'OPEN', 'ONGOING')");
+            $stmt1->bind_param("i", $userId);
+            $stmt1->execute();
+            $result1 = $stmt1->get_result();
+            $row1 = $result1->fetch_assoc();
+            $count = $row1['count'];
+
+            if ($balance - $amount >= $count * 300) {
+                return 1;
+            }
+            return 0;
         }
 
 
@@ -159,13 +184,21 @@
             echo '<div class="error-message">No transaction history found.</div>';
         }
         echo '</div>';
-        
+
         // Withdraw funds from the wallet
         if (isset($_POST['withdraw_amount'])) {
             $amount = sanitizeInput($_POST['amount']);
             $account_number = sanitizeInput($_POST['account_number']);
             $ifsc = sanitizeInput($_POST['ifsc']);
             $remark = 'Ac/No: ' . $account_number . '. IFSC: ' . $ifsc;
+
+
+            //Check if the amount requested can be withdrawn (because of open/ongoing/in progress apts)
+        
+            $canWithdraw = canWithdraw($connection, $balance, $userId, $amount);
+
+
+
             if ($amount && validateInt($amount)) {
                 // Check if the user has sufficient balance
                 $stmt = $connection->prepare("SELECT balance FROM doctorprofile WHERE did = ?");
@@ -179,17 +212,23 @@
 
                     if ($balance >= $amount) {
                         // Sufficient balance, proceed with the withdrawal
-                        $stmt = $connection->prepare("UPDATE doctorprofile SET balance = balance - ? WHERE did = ?");
-                        $stmt->bind_param("ii", $amount, $userId);
-                        if ($stmt->execute()) {
-                            // Insert transaction record into the transactions table
-                            $stmt = $connection->prepare("INSERT INTO transactions (user_id, amount, type, remark) VALUES (?, ?, 'debit', ?)");
-                            $stmt->bind_param("iis", $userId, $amount, $remark);
-                            $stmt->execute();
-                            header("Location: wallet_doc.php?success=Amount successfully withdrawn.");
-                            exit();
+                        if ($canWithdraw) {
+                            $stmt = $connection->prepare("UPDATE doctorprofile SET balance = balance - ? WHERE did = ?");
+                            $stmt->bind_param("ii", $amount, $userId);
+                            if ($stmt->execute()) {
+                                // Insert transaction record into the transactions table
+                                $stmt = $connection->prepare("INSERT INTO transactions (user_id, amount, type, remark) VALUES (?, ?, 'debit', ?)");
+                                $stmt->bind_param("iis", $userId, $amount, $remark);
+                                $stmt->execute();
+                                header("Location: wallet_doc.php?success=Amount successfully withdrawn.");
+                                exit();
+                            } else {
+                                echo '<div class="error-message">Error updating wallet balance: ' . $connection->error . '</div>';
+                            }
                         } else {
-                            echo '<div class="error-message">Error updating wallet balance: ' . $connection->error . '</div>';
+                            echo '<div class="error-message">Please complete some appointments before attempting to withdraw funds that are associated with them. 
+                            <br>You cannot withdraw funds until the appointments are completed. 
+                            Once the appointments are completed, you can proceed with the withdrawal.</div>';
                         }
                     } else {
                         echo '<div class="error-message">Insufficient balance.</div>';
@@ -198,6 +237,7 @@
                     echo '<div class="error-message">No wallet found for the patient.</div>';
                 }
             }
+
         }
         // } else {
         //     echo '<div class="error-message">User not logged in.</div>';
