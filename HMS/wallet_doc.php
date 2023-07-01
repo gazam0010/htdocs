@@ -161,7 +161,7 @@
         echo '</div>';
 
 
-        // Deposit funds into the wallet
+        
         
 
         // Withdraw funds from the wallet
