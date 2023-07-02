@@ -6,10 +6,10 @@ import multiprocessing
 from sklearn.model_selection import GridSearchCV
 
 # Load the training dataset
-train_df = pd.read_csv("path/to/train_data.csv")
+train_df = pd.read_csv("C:/xampp/htdocs/HMS/train_data.csv")
 
 # Load the testing dataset
-test_df = pd.read_csv("path/to/test_data.csv")
+test_df = pd.read_csv("C:/xampp/htdocs/HMS/test_data.csv")
 
 # Split the training dataset into features (X_train) and labels (y_train)
 X_train = train_df.drop(columns="CLASS")
