@@ -1,19 +1,23 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 import multiprocessing
+from sklearn.model_selection import GridSearchCV
 
-# Load the diabetes dataset
-df = pd.read_csv("C:/xampp/htdocs/HMS/diabetes_preprocessed78.csv")
+# Load the training dataset
+train_df = pd.read_csv("path/to/train_data.csv")
 
-# Data Preprocessing
-y = df["Outcome"]
-X = df.drop(columns="Outcome")
+# Load the testing dataset
+test_df = pd.read_csv("path/to/test_data.csv")
 
-# Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=87)
+# Split the training dataset into features (X_train) and labels (y_train)
+X_train = train_df.drop(columns="CLASS")
+y_train = train_df["CLASS"]
+
+# Split the testing dataset into features (X_test) and labels (y_test)
+X_test = test_df.drop(columns="CLASS")
+y_test = test_df["CLASS"]
 
 # Feature Scaling
 sc = StandardScaler()
