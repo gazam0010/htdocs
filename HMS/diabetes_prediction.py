@@ -1,63 +1,52 @@
+import argparse
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from xgboost import XGBClassifier
+from sklearn.ensemble import RandomForestClassifier
 
-# Load the diabetes dataset
-df = pd.read_csv("C:/xampp/htdocs/HMS/diabetes.csv")
+df = pd.read_csv("C:/xampp/htdocs/HMS/Diabetes2.csv")
 
-# Data Preprocessing
-y = df["Outcome"]
-X = df.drop(columns="Outcome")
+y = df["CLASS"]
+X = df.drop(columns="CLASS")
 
-# Get the feature names
 feature_names = X.columns
 
-# Feature Scaling
 sc = StandardScaler()
 X_scaled = sc.fit_transform(X)
 
-# Apply PCA for dimensionality reduction
 pca = PCA(n_components=0.95)
 X_scaled_pca = pca.fit_transform(X_scaled)
 
-# Model Training with Best Hyperparameters
 best_params = {
-    'n_estimators': 145,
     'max_depth': 10,
-    'learning_rate': 0.03115524837673781,
-    'subsample': 0.8068203515465858,
-    'colsample_bytree': 0.8848799231417741
+    'min_samples_split': 2,
+    'n_estimators': 100
 }
 
-xgb = XGBClassifier(random_state=100, **best_params)
-xgb.fit(X_scaled_pca, y)
+rf = RandomForestClassifier(random_state=100, **best_params)
+rf.fit(X_scaled_pca, y)
 
-# Prompt user for parameter values
-pregnancies = float(input("Enter the number of Pregnancies: "))
-glucose = float(input("Enter Glucose level: "))
-blood_pressure = float(input("Enter Blood Pressure: "))
-skin_thickness = float(input("Enter Skin Thickness: "))
-insulin = float(input("Enter Insulin level: "))
-bmi = float(input("Enter BMI: "))
-diabetes_pedigree = float(input("Enter Diabetes Pedigree Function: "))
-age = float(input("Enter Age: "))
+parser = argparse.ArgumentParser()
+parser.add_argument('--gender', type=float, help='Gender')
+parser.add_argument('--age', type=float, help='Age')
+parser.add_argument('--urea', type=float, help='Urea')
+parser.add_argument('--cr', type=float, help='Cr')
+parser.add_argument('--hba1c', type=float, help='HbA1c')
+parser.add_argument('--chol', type=float, help='Chol')
+parser.add_argument('--tg', type=float, help='TG')
+parser.add_argument('--hdl', type=float, help='HDL')
+parser.add_argument('--ldl', type=float, help='LDL')
+parser.add_argument('--vldl', type=float, help='VLDL')
+parser.add_argument('--bmi', type=float, help='BMI')
+args = parser.parse_args()
 
-# Create a new data point using user-entered parameters
-new_data = [[pregnancies, glucose, blood_pressure, skin_thickness, insulin, bmi, diabetes_pedigree, age]]
+new_data = [[args.gender, args.age, args.urea, args.cr, args.hba1c, args.chol, args.tg, args.hdl, args.ldl, args.vldl, args.bmi]]
 
-# Create a DataFrame with the user-entered data and feature names
 new_data_df = pd.DataFrame(new_data, columns=feature_names)
 
-# Preprocess the new data point
 new_data_scaled = sc.transform(new_data_df)
 new_data_scaled_pca = pca.transform(new_data_scaled)
 
-# Make a prediction on the new data point
-prediction = xgb.predict(new_data_scaled_pca)
+prediction = rf.predict(new_data_scaled_pca)
 
-# Print the prediction
-if prediction[0] == 1:
-    print("The person is predicted to have diabetes.")
-else:
-    print("The person is predicted to be diabetes-free.")
+print(prediction[0])

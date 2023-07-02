@@ -4,6 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 import multiprocessing
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import f1_score
 
 
 # Load the training dataset
@@ -67,4 +68,10 @@ y_pred = best_model.predict(X_test_scaled)
 accuracy = accuracy_score(y_test, y_pred)
 print("Testing Accuracy:", accuracy)
 
+# Make predictions on the test set
+y_pred = best_model.predict(X_test_scaled)
 
+# Calculate the F1-score
+f1_macro = f1_score(y_test, y_pred, average='macro')
+
+print("F1-score:", f1_macro)
