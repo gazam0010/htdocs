@@ -30,11 +30,22 @@ $row = mysqli_fetch_assoc($result);
       padding: 20px;
       background-color: #fff;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      animation: fade-in 0.5s ease;
+    }
+
+    @keyframes fade-in {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
     }
 
     h1 {
       text-align: center;
       color: #333;
+      margin-bottom: 20px;
     }
 
     #profile {
@@ -57,16 +68,23 @@ $row = mysqli_fetch_assoc($result);
     p {
       margin: 10px 0;
       color: #555;
+      display: flex;
+      align-items: flex-start;
     }
 
     strong {
       font-weight: bold;
       color: #333;
+      width: 100px;
+      margin-right: 10px;
     }
 
     .contact-info {
       display: flex;
       align-items: center;
+      margin-bottom: 10px;
+      opacity: 0;
+      animation: fade-in 0.5s ease forwards;
     }
 
     .contact-info img {
@@ -112,27 +130,42 @@ $row = mysqli_fetch_assoc($result);
       color: #555;
     }
   </style>
- 
 </head>
 <body>
   <div class="container">
     <h1>Doctor Profile</h1>
     <div id="profile">
-      <h2 id="name"><?php echo $row['dname']; ?></h2><br><br>
+      <h2 id="name"><?php echo $row['dname']; ?></h2>
+      <br><br>
       <p class="contact-info">
-        <strong>Email: </strong> <?php echo $row['email']; ?> <span id="email"></span>
+        <strong>Email:</strong>
+        <img src="email.png" alt="Email Icon" width="20" height="20">
+        <a href="mailto:<?php echo $row['email']; ?>"><?php echo $row['email']; ?></a>
       </p>
       <p class="contact-info">
-        <strong>Phone: </strong> <?php echo $row['dcontact']; ?> <span id="phone"></span>
+        <strong>Phone:</strong>
+        <img src="phone.png" alt="Phone Icon" width="20" height="20">
+        <?php echo $row['dcontact']; ?>
       </p>
-      <p><strong>Address: </strong> <?php echo $row['daddress']; ?><span id="address"></span></p>
-      <p><strong>Specialty: </strong> <?php echo $row['dspecialization']; ?> <span id="specialty"></span></p>
-      <p class="experience"><strong>Experience: </strong><?php echo $row['exp']; ?> Years<span id="experience"></span></p>
-      <div class="qualifications">
-        <strong>Qualifications:</strong>
-        <ul id="qualifications"></ul>
-      </div>
+      <p>
+        <strong>Address:</strong> <?php echo $row['daddress']; ?>
+      </p>
+      <p>
+        <strong>Specialty:</strong> <?php echo $row['dspecialization']; ?>
+      </p>
+      <p class="experience">
+        <strong>Experience:</strong> <?php echo $row['exp']; ?> Years
+      </p>
     </div>
   </div>
+
+  <script>
+    // Fade-in animation for contact-info elements
+    const contactInfo = document.querySelectorAll('.contact-info');
+    contactInfo.forEach((info, index) => {
+      info.style.animationDelay = `${index * 0.1}s`;
+      info.style.animationDuration = '0.5s';
+    });
+  </script>
 </body>
 </html>

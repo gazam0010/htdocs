@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Wallet Management</title>
+    <title>Wallet Doctor/title>
     <link rel="stylesheet" href="wallet.css?">
     <style>
         .withdraw_funds label {

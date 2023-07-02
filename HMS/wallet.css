@@ -133,9 +133,7 @@
       border: 1px solid #ccc;
       padding: 10px;
       min-height: 200px;
-      /* Set a minimum height */
       overflow-y: auto;
-      /* Add vertical scroll if needed */
   }
 
 
